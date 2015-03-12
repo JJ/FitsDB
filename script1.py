@@ -7,23 +7,23 @@ from os import listdir, walk
 def add(url):
   #print url
   listaDatos = pyfits.open(url)
-  campos = listaDatos[0].header.keys()
-  archivocampos = open('nombres_de_campos', 'r')
-  listCampos = archivocampos.read()
-  for campo in campos:
-    #print campos
-    for campo_archivo in listCampos:
-      n = 0
-      if campo == campo_archivo:
+  listaCamposNuevos = listaDatos[0].header.keys()
+  fileCampos = open('nombres_de_campos', 'r')
+  listaCampos = fileCampos.read().splitlines()
+  for strCampoNuevo in listaCamposNuevos:
+    n = 0
+    for strFileCampos in listaCampos:
+      print strFileCampos + " -> " + strCampoNuevo
+      if strCampoNuevo == strFileCampos:
 	n += 1
-      else:
-	n += 0 
+	print "sumando"
+      #else:
+	#n += 0 
+	#print "no hacemos nada"
     if n == 0:
-      archivocampos = open('nombres_de_campos', 'a')
-      archivocampos.write(campo + '\n')
-      archivocampos.close()
-	
-	
+      fileCampos = open('nombres_de_campos', 'a')
+      fileCampos.write(strCampoNuevo + ' \n')
+      fileCampos.close()
 
 
 # Lista los archivos del directorio de ejecución y los almacena en el array aArchivos
