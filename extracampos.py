@@ -4,32 +4,35 @@
 import os, pyfits
 from os import listdir, walk
 
-def add(url):
-  #print url
+def add(url, salida):
   listaDatos = pyfits.open(url)
   listaCamposNuevos = listaDatos[0].header.keys()
-  fileCampos = open('nombres_de_campos', 'r')
+  fileCampos = open(salida, 'r')
   listaCampos = fileCampos.read().splitlines()
   for strCampoNuevo in listaCamposNuevos:
-    n = 0
-    for strFileCampos in listaCampos:
-      print strFileCampos + " -> " + strCampoNuevo
-      if strCampoNuevo == strFileCampos:
-	n += 1
-	print "sumando"
-      #else:
-	#n += 0 
-	#print "no hacemos nada"
-    if n == 0:
-      fileCampos = open('nombres_de_campos', 'a')
+    if strCampoNuevo not in (s.rstrip(' ') for s in listaCampos):
+      fileCampos = open(salida, 'a')
       fileCampos.write(strCampoNuevo + ' \n')
       fileCampos.close()
 
+def ordena(file):
+  f = open(file, 'r')
+  mano = f.readlines()
+  mano.sort()
+  f.close()
+  f = open(file, 'w')
+  f.writelines(mano)
+  f.close()
 
-# Lista los archivos del directorio de ejecución y los almacena en el array aArchivos
+
 directorio_imagenes = "ImagenesPrueba"
+archivo_nombres_campos = "nombres_de_campos"
+j = 0
 for (path, ficheros, archivos) in walk (directorio_imagenes):
   for file in archivos:
     if file.endswith(".fits") or file.endswith(".fit") or file.endswith(".fts"):
       ruta = path + '/' + file
-      add(ruta)
+      add(ruta, archivo_nombres_campos)
+      j += 1
+ordena(archivo_nombres_campos)
+print "Procesados " + str(j) + " archivos."
