@@ -15,7 +15,7 @@ def add(url, salida):
       fileCampos.write(strCampoNuevo + ' \n')
       fileCampos.close()
 
-def ordena(file):
+def sort(file):
   f = open(file, 'r')
   mano = f.readlines()
   mano.sort()
@@ -23,6 +23,27 @@ def ordena(file):
   f = open(file, 'w')
   f.writelines(mano)
   f.close()
+
+import hashlib
+def hashfile(ruta):
+  BLOCKSIZE = 65536
+  hasher = hashlib.md5()
+  with open(ruta, 'rb') as afile:
+      buf = afile.read(BLOCKSIZE)
+      while len(buf) > 0:
+	  hasher.update(buf)
+	  buf = afile.read(BLOCKSIZE)
+  print(hasher.hexdigest())
+
+# SIN TERMINAR
+#def genCsvWithHeaders(sitio, name):
+  #url = sitio + "/" + name
+  #listaDatos = pyfits.open(url)
+  #salida = "salida.csv"
+  ## Vendría bien comprobar si existe y tal
+  #f = open('salida.csv','w')
+  #for campo in listaDatos[0].header.keys():
+    #print listaDatos[0].header[campo]
 
 
 directorio_imagenes = "ImagenesPrueba"
@@ -33,6 +54,18 @@ for (path, ficheros, archivos) in walk (directorio_imagenes):
     if file.endswith(".fits") or file.endswith(".fit") or file.endswith(".fts"):
       ruta = path + '/' + file
       add(ruta, archivo_nombres_campos)
+      #hashfile(ruta)
       j += 1
-ordena(archivo_nombres_campos)
+sort(archivo_nombres_campos)
 print "Procesados " + str(j) + " archivos."
+
+
+#import sys
+#total = len(sys.argv)
+ 
+## Get the arguments list 
+#cmdargs = str(sys.argv)
+ 
+## Print it
+#print ("The total numbers of args passed to the script: %d " % total)
+#print ("Args list: %s " % cmdargs)
