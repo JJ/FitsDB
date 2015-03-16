@@ -57,7 +57,7 @@ def HashFile(ruta):
   #url = sitio + "/" + name
   #listaDatos = pyfits.open(url)
   #salida = "salida.csv"
-  ## Vendría bien comprobar si existe y tal
+  #CheckFileExistence(salida)
   #f = open('salida.csv','w')
   #for campo in listaDatos[0].header.keys():
     #print listaDatos[0].header[campo]
@@ -106,5 +106,7 @@ for (path, ficheros, archivos) in walk (directorio_imagenes):
       #HashFile(ruta)
       j += 1
 Sort(archivo_nombres_campos)
-print colored ("Se han procesados " + str(j) + " archivos.", "green")
+msgfin = "Se han procesados " + str(j) + " archivos.", "green"
+from termcolor import colored
+print colored (msgfin, "green")
 
