@@ -26,7 +26,7 @@ Esta utilidad admite como único argumento el directorio donde se encuentran las
 #### CheckFileExistence(nombrearchivo)
 Comprueba si el archivo que recibe como argumento existe. Si es así devuelve 1, y si no es así primero crea el archivo y luego devuelve 0.
 
-#### Add(url,salida)
+#### AddCampos(url,salida)
 Añade los campos del archivo que se encuentra en *url* al archivo que se encuentra en *salida*.
 
 #### Sort(archivo)
@@ -38,6 +38,12 @@ Genera la suma de verificación md5 del archivo que se le da como argumento.
 #### GenCsvWithHeaders(sitio,name)
 POR COMPLETAR
 Genera un archivo csv (";" como separadores) con los datos listos para incorporar a la base de datos.
+
+#### JD2Date(entrada)
+Genera una fecha y hora en formato legible a partir de una fecha en formato de día juliano.
+
+#### MJD2Date(entrada)
+Genera una fecha y hora en formato legible a partir de una fecha en formato de día juliano modificado.
 
 ### Librerías
 
