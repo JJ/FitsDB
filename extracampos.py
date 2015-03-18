@@ -28,6 +28,7 @@ def AddCampos(url, salida):
       fileCampos = open(salida, 'a')
       fileCampos.write(strCampoNuevo + ' \n')
   fileCampos.close()
+  listaDatos.close()
 
 
 def Sort(archivo):
@@ -81,28 +82,45 @@ def MJD2Date(entrada):
 
 
 def BuscaTiempo(fuente,listaCampos): # Sin acabar
-  if "DATE" in (s.rstrip(' ') for s in listaCampos):
-    print "Fecha"
-  elif "DATE-AVG" or "DATE_AVG" in (s.rstrip(' ') for s in listaCampos):
-    print "Fecha media"
-  elif "DATE-OBS" or "DATE_OBS" in (s.rstrip(' ') for s in listaCampos):
-    print "Fecha obs"
-  elif "JD" or "JUL-DATE" or "JUL_DATE" in (s.rstrip(' ') for s in listaCampos):
-    print "fecha juliana"
-  elif "JD_HELIO" or "JD-HELIO" in (s.rstrip(' ') for s in listaCampos):
-    print "fecha juliana heliocentrica"
-  elif "MJD" or "MJD-OBS" or "MJD_OBS" in (s.rstrip(' ') for s in listaCampos):
-    print "fecha juliana modificada"
+  if "DATE-AVG"  in (s.rstrip(' ') for s in listaCampos):
+    print "Fecha media -> \t" + str(fuente[0].header["DATE-AVG"])
+  elif "DATE" in (s.rstrip(' ') for s in listaCampos):
+    print "Fecha -> \t" + str(fuente[0].header["DATE"])
+    if "T" in str(fuente[0].header["DATE"]):
+      print "\t\t\t" + str(fuente[0].header["DATE"]).split("T")[0]+ "\t" + str(fuente[0].header["DATE"]).split("T")[1]
+    elif "-" in str(fuente[0].header["DATE"]):
+      print "\t\t\t" + str(fuente[0].header["DATE"]).replace("-","/")
+  elif "DATE-OBS" in (s.rstrip(' ') for s in listaCampos):
+    print "Fecha obs -> \t" + str(fuente[0].header["DATE-OBS"]) 
+  elif "DATE_OBS" in (s.rstrip(' ') for s in listaCampos):
+    print "Fecha obs_ -> \t" + str(fuente[0].header["DATE_OBS"]) 
+    
+  elif "JD" in (s.rstrip(' ') for s in listaCampos):
+    print "Fecha juliana -> \t" + str(fuente[0].header["JD"])
+  elif "JUL-DATE" in (s.rstrip(' ') for s in listaCampos):
+    print "Fecha juliana -> \t" + str(fuente[0].header["JUL-DATE"])
+  elif "JUL_DATE" in (s.rstrip(' ') for s in listaCampos):
+    print "Fecha juliana -> \t" + str(fuente[0].header["JUL_DATE"])
+  elif "JD-HELIO" in (s.rstrip(' ') for s in listaCampos):
+    print "fecha juliana heliocen. -> \t" + str(fuente[0].header["JD-HELIO"])
+  elif "JD_HELIO" in (s.rstrip(' ') for s in listaCampos):
+    print "fecha juliana heliocen. -> \t" + str(fuente[0].header["JD_HELIO"])
+  elif "SID-TIME" in (s.rstrip(' ') for s in listaCampos):
+    print "tiempo sideral -> \t" + str(fuente[0].header["SID-TIME"])
+  elif "SID_TIME" in (s.rstrip(' ') for s in listaCampos):
+    print "tiempo sideral -> \t" + str(fuente[0].header["SID_TIME"])
+  elif "MJD" in (s.rstrip(' ') for s in listaCampos):
+    print "fecha juliana mod -> \t" + str(fuente[0].header["MJD"])
+  elif "MJD-OBS" in (s.rstrip(' ') for s in listaCampos):
+    print "fecha juliana mod -> " + str(fuente[0].header["MJD-OBS"])
   elif "MNT_INFO" in (s.rstrip(' ') for s in listaCampos):
     print "mnt_info"
   elif "OPENTIME" in (s.rstrip(' ') for s in listaCampos):
     print "instante apertura obturador"
   elif "READTIME" in (s.rstrip(' ') for s in listaCampos):
     print "tiempod de lectura"
-  elif "SID-TIME" or "SID_TIME" in (s.rstrip(' ') for s in listaCampos):
-    print "tiempo sideral"
   elif "ST" or "STSTART" in (s.rstrip(' ') for s in listaCampos):
-    print "tiempo inicio exp"
+    print "tiempo inicio exp \t" + ruta
   elif "TIME" in (s.rstrip(' ') for s in listaCampos):
     print "instante en el que empieza algo"
   elif "TIME-END" or "TIME_END" in (s.rstrip(' ') for s in listaCampos):
@@ -150,6 +168,8 @@ def GetData(url):
   fuente = pyfits.open(url)
   listaCampos = fuente[0].header.keys()
   tiempo = BuscaTiempo(fuente, listaCampos)
+  fuente.close()
+  
 
 if len(sys.argv) == 2:
   directorio_imagenes = sys.argv[1]
