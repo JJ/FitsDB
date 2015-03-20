@@ -69,7 +69,10 @@ def JD2Date(entrada):
   dia = int(dato)
   inst = dato - dia
   t = Time(dia, inst, format='jd')
-  return t.iso
+  par = t.iso.split(' ')
+  par[0] = t.iso.split(' ')[0].replace('-','/')
+  par[1] = t.iso.split(' ')[1].replace('-',':')
+  return par
 
 
 def MJD2Date(entrada):
@@ -78,7 +81,10 @@ def MJD2Date(entrada):
   dia = int(dato)
   inst = dato - dia
   t = Time(dia, inst, format='mjd')
-  return t.iso
+  par = t.iso.split(' ')
+  par[0] = t.iso.split(' ')[0].replace('-','/')
+  par[1] = t.iso.split(' ')[1].replace('-',':')
+  return par
 
 def FormatoFecha(cadena):
   if 'T' in cadena:
@@ -97,12 +103,26 @@ def EstCom(comentario,buscamos):
       break
   return 0
 
-
+def TiempoExp(cabecera,listaCampos):
+  CamposExp= ['EXPOSURE','EXPTIME']
+  if "EXPOSURE" in listaCampos:
+    return cabecera['EXPOSURE']
+  elif "EXPTIME" in listaCampos:
+    return cabecera['EXPTIME']
+  else:
+    print "No se encuentra el tiempo de exposición."
+    
+    
+def BuscaHora(cabecera, listaCampos):
+  CamposHora=['TIME-OBS','TIME_OBS','UTSTART']
+  if (i for i in CamposHora) in (j for j in listaCampos): # Fallo en este bucle 
+    print cabecera[i]
 
 def TratamientoFecha(nomcampo,valcampo,comcampo):
   if nomcampo == "DATE-AVG":
     par = FormatoFecha(valcampo)
     print "Femed\t"+ "\t"  + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
+    par.extend(['0']) # No hay que +/- T.exposición
   elif nomcampo == "DATE":
     par = FormatoFecha(valcampo)
     print "Fecha\t" + "\t" + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
@@ -113,91 +133,36 @@ def TratamientoFecha(nomcampo,valcampo,comcampo):
     par = FormatoFecha(valcampo)
     print "Feobs_\t" +"\t" + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
   elif nomcampo == "JD":
-    print "Fejul\t" + "\t" + JD2Date(str(valcampo)) + "\t\t\t" + comcampo
+    par = JD2Date(str(valcampo))
+    print "Fejul\t" + "\t" + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
   elif nomcampo == "JUL-DATE":
-    print "Fejul\t" + "\t" + JD2Date(str(valcampo)) + "\t\t\t" + comcampo
+    par = JD2Date(str(valcampo))
+    print "Fejul\t" + "\t" + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
   elif nomcampo == "JUL_DATE":
-    print "Fejul\t" + "\t" + JD2Date(str(valcampo)) + "\t\t\t" + comcampo
+    par = JD2Date(str(valcampo))
+    print "Fejul\t" + "\t" + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
   elif nomcampo == "JD-HELIO":
     print "FeHel\t" + "\t" + str(valcampo) + "\t\t\t" + comcampo
+    par.extend(['0']) # No hay que +/- T.exposición
+
   elif nomcampo == "JD_HELIO":
     print "FeHel\t" + "\t" + str(valcampo) + "\t\t\t" + comcampo
-    
-    
-  #elif nomcampo == "SID-TIME":
-    #print "tiempo sideral\t" + "\t" + str(valcampo) + "\t\t" + comcampo
-  #elif nomcampo == "SID_TIME":
-    #print "tiempo sideral\t" + str(valcampo) + "\t\t" + comcampo
-  #elif nomcampo == "MJD":
-    #print "fecha juliana mod\t" + str(valcampo) + '\t' + MJD2Date(str(valcampo)) + "\t\t\t" + comcampo
-  #elif nomcampo == "MJD-OBS":
-    #print "fecha juliana mod" + str(valcampo) + '\t' + MJD2Date(str(valcampo)) + "\t\t\t" + comcampo
-  #elif nomcampo == "MNT_INFO":
-    #print "mnt_info"
-  #elif nomcampo == "OPENTIME":
-    #print "instante apertura obturador"
-  #elif nomcampo == "READTIME":
-    #print "tiempod de lectura"
-  #elif nomcampo == "STSTART":
-    #print "tiempo inicio exp \t" + ruta
-  #elif nomcampo == "ST":
-    #print "tiempo inicio exp \t" + ruta
-  #elif nomcampo == "TIME":
-    #print "instante en el que empieza algo"
-  #elif nomcampo == "TIME-END":
-    #print "instante en el que termina la última adqu==ición"
-  #elif nomcampo == "TM-START":
-    #print "instante de inicio indet"
-  #elif nomcampo == "TM_START":
-    #print "instante de inicio indet"
-  #elif nomcampo == "UNI-TIME":
-    #print "tiempo universal, ahí es nada"
-  #elif nomcampo == "UNI_TIME":
-    #print "tiempo universal, ahí es nada"
-  #elif nomcampo == "USEC":
-    #print "tiempo de exposición"
-  #elif nomcampo == "UT":
-    #print "inicio de algo, lo que sea"
-  #elif nomcampo == "UTC":
-    #print "inst de inicio en segundos suma"
-  #elif nomcampo == "UT-END":
-    #print "inst de fin en segundos suma"
-  #elif nomcampo == "UT_END":
-    #print "inst de fin en segundos suma"
-  #elif nomcampo == "UTOBS":
-    #print "inst aprox de inicio"
-  #elif nomcampo == "UT_START":
-    #print "inst de inicio indet de algo"
-  #elif nomcampo == "CLOSTIME":
-    #print "inst de cierre del obturador"
-  #elif nomcampo == "CTIME":
-    #print "inst de inicio de exposicion"
-  #elif nomcampo == "DARKTIME":
-    #print "darktime. muchas cosas"
-  #elif nomcampo == "ELAPSED":
-    #print "elapsed"
-  #elif nomcampo == "EXPOSED":
-    #print "exposed"
-  #elif nomcampo == "EXP_ID":
-    #print "exp ip"
-  #elif nomcampo == "EXPTIME":
-    #print "exposure"
-  #elif nomcampo == "EXPOSURE":
-    #print "exposure"
-  #elif nomcampo == "EXPSTART":
-    #print "expstart"
-  #elif nomcampo == "LST":
-    #print "lst"
-  #elif nomcampo == "MNT_INFO":
-    #print "mnt info"
+    par.extend(['0']) # No hay que +/- T.exposición
   else:
     print "No se encuentra " +'\"'+ nomcampo +'\"'+ '\t\t' + ruta
+  return par
+  
 
-def BuscaTiempo(cabecera,listaCampos):
-  CamposFecha = ['DATE-AVG','JD-HELIO','JD','JUL-DATE','JUL_DATE','DATE','DATE-OBS','DATE_OBS','JD_HELIO','SID-TIME','SID_TIME','MJD','MJD-OBS','MNT_INFO','OPENTIME','READTIME','ST','STSTART','TIME''TIME-END','TIME_END','TM_START','TM-START','UNI-TIME','UNI_TIME','USEC','UT','UTC','UT_END','UT-END','UTOBS','UT_START','CLOSTIME','CTIME','DARKTIME','ELAPSED','EXPOSED','EXP_ID','EXPOSURE','EXPTIME','EXPSTART','LST']
+    
+
+def BuscaFyT(cabecera,listaCampos):
+  CamposFecha = ['DATE-AVG','JD','JD-HELIO','JD_HELIO','JUL-DATE','JUL_DATE','DATE-OBS','DATE_OBS','DATE','SID-TIME','SID_TIME','MJD','MJD-OBS','MNT_INFO','OPENTIME','READTIME','ST','STSTART','TIME''TIME-END','TIME_END','TM_START','TM-START','UNI-TIME','UNI_TIME','USEC','UT','UTC','UT_END','UT-END','UTOBS','UT_START','CLOSTIME','CTIME','DARKTIME','ELAPSED','EXPOSED','EXP_ID','EXPSTART','LST']
   for i in CamposFecha:
     if i in (s.rstrip(' ') for s in listaCampos):
-      TratamientoFecha(i,cabecera[i],cabecera.comments[i])
+      par = TratamientoFecha(i,cabecera[i],cabecera.comments[i])
+      if par[1] == '':
+	print 'No tenemos hora'
+	BuscaHora(cabecera,listaCampos)
       break
 
 
@@ -209,7 +174,8 @@ def GetData(url):
     fuente = pyfits.open(url)
     listaCampos = fuente[0].header.keys()
     cabecera = fuente[0].header
-    tiempo = BuscaTiempo(cabecera, listaCampos)
+    tiempo = BuscaFyT(cabecera, listaCampos)
+    #print TiempoExp(cabecera,listaCampos)
     fuente.close()
   except:
     print "Error al abrir " + url
