@@ -80,95 +80,141 @@ def MJD2Date(entrada):
   t = Time(dia, inst, format='mjd')
   return t.iso
 
-
-def BuscaTiempo(fuente,listaCampos): # Sin acabar
-  if "DATE-AVG"  in (s.rstrip(' ') for s in listaCampos):
-    print "Fecha media -> \t" + str(fuente[0].header["DATE-AVG"])
-  elif "DATE" in (s.rstrip(' ') for s in listaCampos):
-    print "Fecha -> \t" + str(fuente[0].header["DATE"])
-    if "T" in str(fuente[0].header["DATE"]):
-      print "\t\t\t" + str(fuente[0].header["DATE"]).split("T")[0]+ "\t" + str(fuente[0].header["DATE"]).split("T")[1]
-    elif "-" in str(fuente[0].header["DATE"]):
-      print "\t\t\t" + str(fuente[0].header["DATE"]).replace("-","/")
-  elif "DATE-OBS" in (s.rstrip(' ') for s in listaCampos):
-    print "Fecha obs -> \t" + str(fuente[0].header["DATE-OBS"]) 
-  elif "DATE_OBS" in (s.rstrip(' ') for s in listaCampos):
-    print "Fecha obs_ -> \t" + str(fuente[0].header["DATE_OBS"]) 
-    
-  elif "JD" in (s.rstrip(' ') for s in listaCampos):
-    print "Fecha juliana -> \t" + str(fuente[0].header["JD"])
-  elif "JUL-DATE" in (s.rstrip(' ') for s in listaCampos):
-    print "Fecha juliana -> \t" + str(fuente[0].header["JUL-DATE"])
-  elif "JUL_DATE" in (s.rstrip(' ') for s in listaCampos):
-    print "Fecha juliana -> \t" + str(fuente[0].header["JUL_DATE"])
-  elif "JD-HELIO" in (s.rstrip(' ') for s in listaCampos):
-    print "fecha juliana heliocen. -> \t" + str(fuente[0].header["JD-HELIO"])
-  elif "JD_HELIO" in (s.rstrip(' ') for s in listaCampos):
-    print "fecha juliana heliocen. -> \t" + str(fuente[0].header["JD_HELIO"])
-  elif "SID-TIME" in (s.rstrip(' ') for s in listaCampos):
-    print "tiempo sideral -> \t" + str(fuente[0].header["SID-TIME"])
-  elif "SID_TIME" in (s.rstrip(' ') for s in listaCampos):
-    print "tiempo sideral -> \t" + str(fuente[0].header["SID_TIME"])
-  elif "MJD" in (s.rstrip(' ') for s in listaCampos):
-    print "fecha juliana mod -> \t" + str(fuente[0].header["MJD"])
-  elif "MJD-OBS" in (s.rstrip(' ') for s in listaCampos):
-    print "fecha juliana mod -> " + str(fuente[0].header["MJD-OBS"])
-  elif "MNT_INFO" in (s.rstrip(' ') for s in listaCampos):
-    print "mnt_info"
-  elif "OPENTIME" in (s.rstrip(' ') for s in listaCampos):
-    print "instante apertura obturador"
-  elif "READTIME" in (s.rstrip(' ') for s in listaCampos):
-    print "tiempod de lectura"
-  elif "ST" or "STSTART" in (s.rstrip(' ') for s in listaCampos):
-    print "tiempo inicio exp \t" + ruta
-  elif "TIME" in (s.rstrip(' ') for s in listaCampos):
-    print "instante en el que empieza algo"
-  elif "TIME-END" or "TIME_END" in (s.rstrip(' ') for s in listaCampos):
-    print "instante en el que termina la última adquisición"
-  elif "TM_START" or "TM-START" in (s.rstrip(' ') for s in listaCampos):
-    print "instante de inicio indet"
-  elif "UNI-TIME" or "UNI_TIME" in (s.rstrip(' ') for s in listaCampos):
-    print "tiempo universal, ahí es nada"
-  elif "USEC" in (s.rstrip(' ') for s in listaCampos):
-    print "tiempo de exposición"
-  elif "UT" in (s.rstrip(' ') for s in listaCampos):
-    print "inicio de algo, lo que sea"
-  elif "UTC" in (s.rstrip(' ') for s in listaCampos):
-    print "inst de inicio en segundos suma"
-  elif "UT_END" or "UT-END" in (s.rstrip(' ') for s in listaCampos):
-    print "inst de fin en segundos suma"
-  elif "UTOBS" in (s.rstrip(' ') for s in listaCampos):
-    print "inst aprox de inicio"
-  elif "UT_START" in (s.rstrip(' ') for s in listaCampos):
-    print "inst de inicio indet de algo"
-  elif "CLOSTIME" in (s.rstrip(' ') for s in listaCampos):
-    print "inst de cierre del obturador"
-  elif "CTIME" in (s.rstrip(' ') for s in listaCampos):
-    print "inst de inicio de exposicion"
-  elif "DARKTIME" in (s.rstrip(' ') for s in listaCampos):
-    print "darktime. muchas cosas"
-  elif "ELAPSED" in (s.rstrip(' ') for s in listaCampos):
-    print "elapsed"
-  elif "EXPOSED" in (s.rstrip(' ') for s in listaCampos):
-    print "exposed"
-  elif "EXP_ID" in (s.rstrip(' ') for s in listaCampos):
-    print "exp ip"
-  elif "EXPOSURE" or "EXPTIME" in (s.rstrip(' ') for s in listaCampos):
-    print "exposure"
-  elif "EXPSTART" in (s.rstrip(' ') for s in listaCampos):
-    print "expstart"
-  elif "LST" in (s.rstrip(' ') for s in listaCampos):
-    print "lst"
-  elif "MNT_INFO" in (s.rstrip(' ') for s in listaCampos):
-    print "mnt info"
+def FormatoFecha(cadena):
+  if 'T' in cadena:
+    par = cadena.split("T")
+    par[0] = par[0].replace('-','/')
+    par[1] = par[1].replace('-',':')
   else:
-    print "No se encuentra."
+    par = [cadena.replace('-','/'),'']
+  return par
+ 
+def EstCom(comentario,buscamos):
+  palabras = comentario.split(' ')
+  for i in palabras:
+    if i == buscamos:
+      return 1
+      break
+  return 0
+
+
+
+def TratamientoFecha(nomcampo,valcampo,comcampo):
+  if nomcampo == "DATE-AVG":
+    par = FormatoFecha(valcampo)
+    print "Femed\t"+ "\t"  + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
+  elif nomcampo == "DATE":
+    par = FormatoFecha(valcampo)
+    print "Fecha\t" + "\t" + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
+  elif nomcampo == "DATE-OBS":
+    par = FormatoFecha(valcampo)
+    print "Feobs\t" + "\t" + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
+  elif nomcampo == "DATE_OBS":
+    par = FormatoFecha(valcampo)
+    print "Feobs_\t" +"\t" + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
+  elif nomcampo == "JD":
+    print "Fejul\t" + "\t" + JD2Date(str(valcampo)) + "\t\t\t" + comcampo
+  elif nomcampo == "JUL-DATE":
+    print "Fejul\t" + "\t" + JD2Date(str(valcampo)) + "\t\t\t" + comcampo
+  elif nomcampo == "JUL_DATE":
+    print "Fejul\t" + "\t" + JD2Date(str(valcampo)) + "\t\t\t" + comcampo
+  elif nomcampo == "JD-HELIO":
+    print "FeHel\t" + "\t" + str(valcampo) + "\t\t\t" + comcampo
+  elif nomcampo == "JD_HELIO":
+    print "FeHel\t" + "\t" + str(valcampo) + "\t\t\t" + comcampo
+    
+    
+  #elif nomcampo == "SID-TIME":
+    #print "tiempo sideral\t" + "\t" + str(valcampo) + "\t\t" + comcampo
+  #elif nomcampo == "SID_TIME":
+    #print "tiempo sideral\t" + str(valcampo) + "\t\t" + comcampo
+  #elif nomcampo == "MJD":
+    #print "fecha juliana mod\t" + str(valcampo) + '\t' + MJD2Date(str(valcampo)) + "\t\t\t" + comcampo
+  #elif nomcampo == "MJD-OBS":
+    #print "fecha juliana mod" + str(valcampo) + '\t' + MJD2Date(str(valcampo)) + "\t\t\t" + comcampo
+  #elif nomcampo == "MNT_INFO":
+    #print "mnt_info"
+  #elif nomcampo == "OPENTIME":
+    #print "instante apertura obturador"
+  #elif nomcampo == "READTIME":
+    #print "tiempod de lectura"
+  #elif nomcampo == "STSTART":
+    #print "tiempo inicio exp \t" + ruta
+  #elif nomcampo == "ST":
+    #print "tiempo inicio exp \t" + ruta
+  #elif nomcampo == "TIME":
+    #print "instante en el que empieza algo"
+  #elif nomcampo == "TIME-END":
+    #print "instante en el que termina la última adqu==ición"
+  #elif nomcampo == "TM-START":
+    #print "instante de inicio indet"
+  #elif nomcampo == "TM_START":
+    #print "instante de inicio indet"
+  #elif nomcampo == "UNI-TIME":
+    #print "tiempo universal, ahí es nada"
+  #elif nomcampo == "UNI_TIME":
+    #print "tiempo universal, ahí es nada"
+  #elif nomcampo == "USEC":
+    #print "tiempo de exposición"
+  #elif nomcampo == "UT":
+    #print "inicio de algo, lo que sea"
+  #elif nomcampo == "UTC":
+    #print "inst de inicio en segundos suma"
+  #elif nomcampo == "UT-END":
+    #print "inst de fin en segundos suma"
+  #elif nomcampo == "UT_END":
+    #print "inst de fin en segundos suma"
+  #elif nomcampo == "UTOBS":
+    #print "inst aprox de inicio"
+  #elif nomcampo == "UT_START":
+    #print "inst de inicio indet de algo"
+  #elif nomcampo == "CLOSTIME":
+    #print "inst de cierre del obturador"
+  #elif nomcampo == "CTIME":
+    #print "inst de inicio de exposicion"
+  #elif nomcampo == "DARKTIME":
+    #print "darktime. muchas cosas"
+  #elif nomcampo == "ELAPSED":
+    #print "elapsed"
+  #elif nomcampo == "EXPOSED":
+    #print "exposed"
+  #elif nomcampo == "EXP_ID":
+    #print "exp ip"
+  #elif nomcampo == "EXPTIME":
+    #print "exposure"
+  #elif nomcampo == "EXPOSURE":
+    #print "exposure"
+  #elif nomcampo == "EXPSTART":
+    #print "expstart"
+  #elif nomcampo == "LST":
+    #print "lst"
+  #elif nomcampo == "MNT_INFO":
+    #print "mnt info"
+  else:
+    print "No se encuentra " +'\"'+ nomcampo +'\"'+ '\t\t' + ruta
+
+def BuscaTiempo(cabecera,listaCampos):
+  CamposFecha = ['DATE-AVG','JD-HELIO','JD','JUL-DATE','JUL_DATE','DATE','DATE-OBS','DATE_OBS','JD_HELIO','SID-TIME','SID_TIME','MJD','MJD-OBS','MNT_INFO','OPENTIME','READTIME','ST','STSTART','TIME''TIME-END','TIME_END','TM_START','TM-START','UNI-TIME','UNI_TIME','USEC','UT','UTC','UT_END','UT-END','UTOBS','UT_START','CLOSTIME','CTIME','DARKTIME','ELAPSED','EXPOSED','EXP_ID','EXPOSURE','EXPTIME','EXPSTART','LST']
+  for i in CamposFecha:
+    if i in (s.rstrip(' ') for s in listaCampos):
+      TratamientoFecha(i,cabecera[i],cabecera.comments[i])
+      break
+
+
+
+  
 
 def GetData(url):
-  fuente = pyfits.open(url)
-  listaCampos = fuente[0].header.keys()
-  tiempo = BuscaTiempo(fuente, listaCampos)
-  fuente.close()
+  try:
+    fuente = pyfits.open(url)
+    listaCampos = fuente[0].header.keys()
+    cabecera = fuente[0].header
+    tiempo = BuscaTiempo(cabecera, listaCampos)
+    fuente.close()
+  except:
+    print "Error al abrir " + url
+    pass
+
   
 
 if len(sys.argv) == 2:
@@ -209,11 +255,13 @@ j = 0
 for (path, ficheros, archivos) in walk (directorio_imagenes):
   for file in archivos:
     if file.endswith(".fits") or file.endswith(".fit") or file.endswith(".fts"):
-      ruta = path + '/' + file
+      ruta = path + '/' + file # aquí antes había en medio un  + '/'
       #AddCampos(ruta, archivo_nombres_campos)
       #HashFile(ruta)
       GetData(ruta)
       j += 1
+#GetData('ImagenesPrueba/2013AZ60-027Cle.fit')
+
 Sort(archivo_nombres_campos)
 msgfin = "Se han procesados " + str(j) + " archivos.", "green"
 from termcolor import colored
