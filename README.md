@@ -1,2 +1,2 @@
-# IAA-1
+# FitsDB
 Utilidad para extraer metadatos de archivos fits.
