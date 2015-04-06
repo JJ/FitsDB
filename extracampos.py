@@ -50,12 +50,13 @@ def HashFile(ruta):
       while len(buf) > 0:
 	  hasher.update(buf)
 	  buf = afile.read(BLOCKSIZE)
-  print(hasher.hexdigest())
+  return hasher.hexdigest()
 
 
 # SIN TERMINAR
 #def GenCsvWithHeaders(sitio, name):
   #url = sitio + "/" + name
+  #url = url.replace('//','/')
   #listaDatos = pyfits.open(url)
   #salida = "salida.csv"
   #CheckFileExistence(salida)
@@ -70,7 +71,7 @@ def JD2Date(entrada):
   inst = dato - dia
   t = Time(dia, inst, format='jd')
   par = t.iso.split(' ')
-  par[0] = t.iso.split(' ')[0].replace('-','/')
+  par[0] = t.iso.split(' ')[0].replace('/','-')
   par[1] = t.iso.split(' ')[1].replace('-',':')
   return par
 
@@ -82,17 +83,17 @@ def MJD2Date(entrada):
   inst = dato - dia
   t = Time(dia, inst, format='mjd')
   par = t.iso.split(' ')
-  par[0] = t.iso.split(' ')[0].replace('-','/')
+  par[0] = t.iso.split(' ')[0].replace('/','-')
   par[1] = t.iso.split(' ')[1].replace('-',':')
   return par
 
 def FormatoFecha(cadena):
   if 'T' in cadena:
     par = cadena.split("T")
-    par[0] = par[0].replace('-','/')
+    par[0] = par[0].replace('/','-')
     par[1] = par[1].replace('-',':')
   else:
-    par = [cadena.replace('-','/'),'']
+    par = [cadena.replace('/','-'),'']
   return par
  
 def EstCom(comentario,buscamos):
@@ -104,81 +105,264 @@ def EstCom(comentario,buscamos):
   return 0
 
 def TiempoExp(cabecera,listaCampos):
-  CamposExp= ['EXPOSURE','EXPTIME']
+  #CamposExp= ['EXPOSURE','EXPTIME']
   if "EXPOSURE" in listaCampos:
-    return cabecera['EXPOSURE']
+    return str(cabecera['EXPOSURE']).lstrip(' ')
   elif "EXPTIME" in listaCampos:
-    return cabecera['EXPTIME']
+    return str(cabecera['EXPTIME']).lstrip(' ')
   else:
     print "No se encuentra el tiempo de exposición."
     
     
 def BuscaHora(cabecera, listaCampos):
-  CamposHora=['TIME-OBS','TIME_OBS','UTSTART']
-  if (i for i in CamposHora) in (j for j in listaCampos): # Fallo en este bucle 
-    print cabecera[i]
+  CamposHora=['TIME-OBS','TIME_OBS','UTSTART','UT','EXPSTART','TIME-INI']
+  for i in CamposHora:
+    if i in (s.rstrip(' ') for s in listaCampos):
+      if cabecera[i] != '':
+	return cabecera[i]
+	break
+  #print ruta
+  #print listaCampos
+  return 'UNK'
 
 def TratamientoFecha(nomcampo,valcampo,comcampo):
-  if nomcampo == "DATE-AVG":
+  if nomcampo == "DATE-OBS":
     par = FormatoFecha(valcampo)
-    print "Femed\t"+ "\t"  + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
+    par.extend([''])
+  elif nomcampo == "DATE_OBS":
+    par = FormatoFecha(valcampo)
+    par.extend([''])
+  elif nomcampo == "DATE-AVG":
+    par = FormatoFecha(valcampo)
+    par.extend([''])
     par.extend(['0']) # No hay que +/- T.exposición
   elif nomcampo == "DATE":
     par = FormatoFecha(valcampo)
-    print "Fecha\t" + "\t" + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
-  elif nomcampo == "DATE-OBS":
-    par = FormatoFecha(valcampo)
-    print "Feobs\t" + "\t" + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
-  elif nomcampo == "DATE_OBS":
-    par = FormatoFecha(valcampo)
-    print "Feobs_\t" +"\t" + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
+    par.extend([''])
   elif nomcampo == "JD":
     par = JD2Date(str(valcampo))
-    print "Fejul\t" + "\t" + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
+    par.extend([''])
   elif nomcampo == "JUL-DATE":
     par = JD2Date(str(valcampo))
-    print "Fejul\t" + "\t" + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
+    par.extend([''])
   elif nomcampo == "JUL_DATE":
     par = JD2Date(str(valcampo))
-    print "Fejul\t" + "\t" + par[0] + ' ' + par[1] + "\t\t\t" + comcampo
+    par.extend([''])
   elif nomcampo == "JD-HELIO":
-    print "FeHel\t" + "\t" + str(valcampo) + "\t\t\t" + comcampo
     par.extend(['0']) # No hay que +/- T.exposición
-
   elif nomcampo == "JD_HELIO":
-    print "FeHel\t" + "\t" + str(valcampo) + "\t\t\t" + comcampo
     par.extend(['0']) # No hay que +/- T.exposición
   else:
     print "No se encuentra " +'\"'+ nomcampo +'\"'+ '\t\t' + ruta
+    par.extend([''])
   return par
-  
 
-    
+
+
+
 
 def BuscaFyT(cabecera,listaCampos):
-  CamposFecha = ['DATE-AVG','JD','JD-HELIO','JD_HELIO','JUL-DATE','JUL_DATE','DATE-OBS','DATE_OBS','DATE','SID-TIME','SID_TIME','MJD','MJD-OBS','MNT_INFO','OPENTIME','READTIME','ST','STSTART','TIME''TIME-END','TIME_END','TM_START','TM-START','UNI-TIME','UNI_TIME','USEC','UT','UTC','UT_END','UT-END','UTOBS','UT_START','CLOSTIME','CTIME','DARKTIME','ELAPSED','EXPOSED','EXP_ID','EXPSTART','LST']
+  CamposFecha = ['DATE-OBS','DATE-AVG','JD','JUL-DATE','JUL_DATE','JD-HELIO','JD_HELIO','DATE_OBS','DATE','SID-TIME','SID_TIME','MJD','MJD-OBS','MNT_INFO','OPENTIME','READTIME','ST','STSTART','TIME''TIME-END','TIME_END','TM_START','TM-START','UNI-TIME','UNI_TIME','USEC','UT','UTC','UT_END','UT-END','UTOBS','UT_START','CLOSTIME','CTIME','DARKTIME','ELAPSED','EXPOSED','EXP_ID','EXPSTART','LST']
   for i in CamposFecha:
     if i in (s.rstrip(' ') for s in listaCampos):
-      par = TratamientoFecha(i,cabecera[i],cabecera.comments[i])
+      par = TratamientoFecha(i,cabecera[i],cabecera.comments[i]) # par es una lista de 3 componentes
       if par[1] == '':
-	print 'No tenemos hora'
-	BuscaHora(cabecera,listaCampos)
+	par[1] = BuscaHora(cabecera,listaCampos)
+      par[2] = TiempoExp(cabecera, listaCampos)
       break
+  return par
 
 
 
+def BuscaInstr(cabecera,listaCampos): # Algunos archivos no tienen esta información
+  CamposInstr = ['INSTRID','INSTRKEY','INSTRUM','INSTRUME']
+  for i in CamposInstr:
+    if i in (s.rstrip(' ') for s in listaCampos):
+      if cabecera[i] != '':
+	return cabecera[i]
+	break
+  #print ruta
+  #prinLight Framet listaCampos
+  return 'UNK'
+
+
+def BuscarTelescopio(cabecera,listaCampos):
+  CamposTelescopio = ['TELESCOP']
+  for i in CamposTelescopio:
+    if i in (s.rstrip(' ') for s in listaCampos):
+      if cabecera[i] != '':
+	return cabecera[i]
+	break
+  #print ruta
+  #print listaCampos
+  return 'UNK'
+
+
+
+def BuscaObservatorio2(cabecera,listaCampos): # Esta incluye coordenadas para los archivos sin observatorio
+  CamposObservatorio = ['OBSERVAT','ORIGIN']
+  salida = 'UNK'
+  for i in CamposObservatorio:
+    if i in (s.rstrip(' ') for s in listaCampos):
+      if cabecera[i] != '':
+	salida = cabecera[i].replace('stron?mico','stronómico')
+	return salida
+	break
+  print "peto1"
+  CamposLong = ['SITELONG','LONGITUD','LONG-OBS']
+  CamposLat = ['SITELAT','LATITUDE','LAT-OBS']
+  for j in CamposLong:
+    if j in (s.rstrip(' ') for s in listaCampos):
+      print "peto2"
+      if cabecera[j] != '':
+	print "peto3"
+	Long = cabecera[j]
+    else:
+      print "no está"
+  print "peto2.1"
+  for k in CamposLat:
+    if k in (s.rstrip(' ') for s in listaCampos):
+      if cabecera[k] != '':
+	Lat = cabecera[k]
+    else:
+      print "tampoco está"
+  if len(str(Long)) > 1:
+    print "hay datos"
+    salida = str(Long) + '; ' + str(Lat)
+  else:
+    return salida
+
+
+def BuscaObservatorio(cabecera,listaCampos):
+  CamposObservatorio = ['OBSERVAT','ORIGIN']
+  salida = 'UNK'
+  for i in CamposObservatorio:
+    if i in (s.rstrip(' ') for s in listaCampos):
+      if cabecera[i] != '':
+	salida = cabecera[i].replace('stron?mico','stronómico')
+	return salida
+	break
+  return salida
+
+
+def BuscaObject(cabecera,listaCampos):
+  CamposObject = ['OBJECT','OBJCAT']
+  evitamos = ['','flat','bias']
+  for i in CamposObject:
+    if i in (s.rstrip(' ') for s in listaCampos):
+      if cabecera[i].strip(' ').lower() not in evitamos:
+	#print ruta
+	return cabecera[i]
+	break
+  #print ruta
+  #print listaCampos
+  return ruta.split('/')[-1]
+
+
+def ClassifyImgType(tipo, ruta):
+  partes = tipo.lower().split(' ')
+  carpetas = ruta.lower()
+  listaCal = ['bias','flat','dark','domme']
+  for i in listaCal:# and carpetas:
+    if i in partes:
+      return 0
+    elif i in carpetas:
+      return 0
+  return 1
   
+  
+
+
+def BuscaImgType(cabecera,listaCampos):
+  CamposImgType = ['IMAGETYP']
+  for i in CamposImgType:
+    if i in (s.rstrip(' ') for s in listaCampos):
+      if cabecera[i] != '':
+	return cabecera[i]
+	break
+  #print ruta
+  #print listaCampos
+  return 'UNK'
+
+
+
+
+
+def BuscaFilter(cabecera,listaCampos):
+  CamposFilter = ['FILTER']
+  for i in CamposFilter:
+    if i in (s.rstrip(' ') for s in listaCampos):
+      if cabecera[i] != '':
+	return cabecera[i]
+	break
+  #print ruta
+  #print listaCampos
+  return 'UNK'
+
+#--------------------------
+
+
+def IniciarDB():
+  global db
+  db = MySQLdb.connect(host="localhost",user="pablo",passwd="halconmilenario",db="pruebasdb")
+  global cur
+  cur = db.cursor()
+
+
+
+def CheckDB(suma):
+  querry = 'SELECT md5 FROM ' + tablaDB + 'WHERE md5="%s%"'
+  cur.execute(querry,(suma))
+  if len(str(cur.fetchall()[0])) > 1:
+    return 1
+  else:
+    return 0
+
+
+
+
+#--------------------------
+
+
 
 def GetData(url):
   try:
     fuente = pyfits.open(url)
     listaCampos = fuente[0].header.keys()
     cabecera = fuente[0].header
-    tiempo = BuscaFyT(cabecera, listaCampos)
-    #print TiempoExp(cabecera,listaCampos)
+    par = BuscaFyT(cabecera, listaCampos)
+    Instr = BuscaInstr(cabecera,listaCampos)
+    Telescopio = BuscarTelescopio(cabecera,listaCampos)
+    
+    if 'OSN' in Telescopio:
+      Observatorio = 'OSN'
+      Telescopio = Telescopio.replace('OSN','').strip(' ')
+    elif 'Sierra Nevada Observatory' in Telescopio:
+      Observatorio = 'OSN'
+      Telescopio = Telescopio.replace('Sierra Nevada Observatory','').strip(' ')
+    elif 'ESO' in Telescopio:
+      Observatorio = 'ESO'
+      Telescopio = Telescopio.replace('ESO-','').strip(' ')
+    elif 'IAC' in Telescopio:
+      Observatorio = 'IAC'
+    else:
+      Observatorio = BuscaObservatorio(cabecera,listaCampos)
+    ImgType = BuscaImgType(cabecera, listaCampos)
+    
+    if ClassifyImgType(ImgType, ruta) == 1:
+      Object = BuscaObject(cabecera,listaCampos)
+    else:
+      Object = 'Flat/Bias'
+    Filter = BuscaFilter(cabecera, listaCampos)
+    print par
+    print Object + ', ' + ImgType
+    print Observatorio +', ' + Telescopio + ', ' + Instr
+    #print '\t' + url
+
+
     fuente.close()
   except:
-    print "Error al abrir " + url
+    print "---> Error al abrir " + url
     pass
 
   
@@ -221,14 +405,15 @@ j = 0
 for (path, ficheros, archivos) in walk (directorio_imagenes):
   for file in archivos:
     if file.endswith(".fits") or file.endswith(".fit") or file.endswith(".fts"):
-      ruta = path + '/' + file # aquí antes había en medio un  + '/'
+      ruta = path + '/' + file
+      ruta = ruta.replace('//','/')
       #AddCampos(ruta, archivo_nombres_campos)
-      #HashFile(ruta)
-      GetData(ruta)
+      HashFile(ruta)
+      #GetData(ruta)
       j += 1
-#GetData('ImagenesPrueba/2013AZ60-027Cle.fit')
 
-Sort(archivo_nombres_campos)
+
+#Sort(archivo_nombres_campos)
 msgfin = "Se han procesados " + str(j) + " archivos.", "green"
 from termcolor import colored
 print colored (msgfin, "green")
