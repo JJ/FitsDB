@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # -*- coding: utf8 -*-
 
 import MySQLdb
@@ -7,12 +7,12 @@ import MySQLdb
 def iniciodb():
   global db
   import ConfigParser
-  getconfig = ConfigParser.ConfigParser()
-  getconfig.read('config.cfg')
-  varUser = getconfig('mysql', 'user')
-  varPass = getconfig('mysql', 'pass')
-  varDBName = getconfig('mysql', 'dbname')
-  varHost = getconfig('mysql', 'hostname')
+  config = ConfigParser.RawConfigParser()
+  config.read('config.cfg')
+  varUser = config.get('mysql', 'user')
+  varPass = config.get('mysql', 'pass')
+  varDBName = config.get('mysql', 'dbname')
+  varHost = config.get('mysql', 'hostname')
   db = MySQLdb.connect(host=varHost,user=varUser,passwd=varPass,db=varDBName)
   global cur
   cur = db.cursor() 
@@ -23,7 +23,7 @@ cur.execute('SELECT name, owner FROM pet')
 #for row in cur.fetchall():
   #print row
   
-name = "bobete"
+name = "José"
 owner = "paco"
 species = "perico"
 sex = "m"
