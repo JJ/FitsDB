@@ -6,7 +6,14 @@ import MySQLdb
 
 def iniciodb():
   global db
-  db = MySQLdb.connect(host="localhost",user="pablo",passwd="halconmilenario",db="pruebasdb")
+  import ConfigParser
+  getconfig = ConfigParser.ConfigParser()
+  getconfig.read('config.cfg')
+  varUser = getconfig('mysql', 'user')
+  varPass = getconfig('mysql', 'pass')
+  varDBName = getconfig('mysql', 'dbname')
+  varHost = getconfig('mysql', 'hostname')
+  db = MySQLdb.connect(host=varHost,user=varUser,passwd=varPass,db=varDBName)
   global cur
   cur = db.cursor() 
 
