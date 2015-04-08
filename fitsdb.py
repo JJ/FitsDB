@@ -5,12 +5,73 @@ import os, pyfits, sys
 from os import listdir, walk
 
 
+def ErrorSQL():
+  from termcolor import colored
+  print colored ("¡ERROR!", "red")
+  print "No se ha encontrado la configuración necesaria para el uso de"
+  print "la base de datos MySQL."
+  print " "
+  print "Debe rellenar los campos del archivo \'config.cfg\' relativos a"
+  print "la base de datos según el ejemplo que se muestra a continuación:"
+  print " "
+  print "[mysql]"
+  print "user = NombreDeUsuario"
+  print "pass = Contraseña"
+  print "dbname = NombreDeLaBaseDeDatos"
+  print "hostname = DirecciónDelServidor"
+  print " "
+  print "Vuelva a intentarlo, por favor."
+  print " "
+
+
+def ErrorNoArg():
+  from termcolor import colored
+  print colored ("¡ERROR!", "red")
+  print "Para que el programa funcione correctamente tiene que añadirle un argumento."
+  print "A continuación se muestra un ejemplo:"
+  print " "
+  print "$ ./extracampos.py rutaamidirectorio/"
+  print " "
+  print "Donde \"rutaamidirectorio/\" es la ruta desde donde se está ejecutando este"
+  print "programa hasta donde se encuentran las imágenes del tipo .fits, .fit y/o .fts"
+  print " "
+  print "Vuelva a intentarlo, por favor."
+  print " "
+
+
+def ErrorMuchosArg():
+  from termcolor import colored
+  print colored ("¡ERROR!", "red")
+  print "Solo se admite un único argumento: un directorio que contenga las imagenes"
+  print "del tipo .fits, .fit y/o .fts"
+  print " "
+  print "A continuación se muestra un ejemplo:"
+  print " "
+  print "$ ./extracampos.py rutaamidirectorio/"
+  print " "
+  print "Donde \"rutaamidirectorio/\" es la ruta desde donde se está ejecutando este"
+  print "programa hasta donde se encuentran las imágenes del tipo .fits, .fit y/o .fts"
+  print " "
+  print "Vuelva a intentarlo, por favor."
+  print " "
+
+
+
 def CheckFileExistence(nombrearchivo):
   if os.path.exists(nombrearchivo):
     return 1
   elif not os.path.exists(nombrearchivo):
     file(nombrearchivo, 'w').close()
     return 0
+
+
+def CheckConfFileExistence():
+  if os.path.exists("./config.cfg"):
+    return 1
+  elif not os.path.exists("./config.cfg"):
+    os.rename("./config.cfg.new","./config.cfg")
+    ErrorSQL()
+    sys.exit()
 
 
 def AddCampos(url, salida):
@@ -41,8 +102,9 @@ def Sort(archivo):
   f.close()
 
 
-import hashlib
+
 def HashFile(ruta):
+  import hashlib
   BLOCKSIZE = 65536
   hasher = hashlib.md5()
   with open(ruta, 'rb') as afile:
@@ -302,18 +364,55 @@ def BuscaFilter(cabecera,listaCampos):
 #--------------------------
 
 
+def CrearTabla():
+  cur.execute("""CREATE TABLE IF NOT EXISTS tablaobs
+  (id BIGINT NOT NULL UNIQUE AUTO_INCREMENT,
+  moddate TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  md5sum CHAR(32) NOT NULL,
+  imgtype VARCHAR(20),
+  object VARCHAR(30),
+  dateobs DATE,
+  timeobs TIME,
+  exptime INT,
+  observatory VARCHAR(80),
+  telescope VARCHAR(80),
+  instrument VARCHAR(80),
+  rute VARCHAR(200) NOT NULL)""")
+  cur.execute("SET NAMES 'utf8'")
+  cur.execute("SET CHARACTER SET utf8")
+  #db.commit()
+
+
 def IniciarDB():
-  global db
-  db = MySQLdb.connect(host="localhost",user="pablo",passwd="halconmilenario",db="pruebasdb")
-  global cur
-  cur = db.cursor()
+  if CheckConfFileExistence():
+    import ConfigParser
+    import MySQLdb
+    config = ConfigParser.RawConfigParser()
+    config.read('config.cfg')
+    varUser = config.get('mysql', 'user')
+    varPass = config.get('mysql', 'pass')
+    varDBName = config.get('mysql', 'dbname')
+    varHost = config.get('mysql', 'hostname')
+    if (varUser == "") or (varPass == "") or (varDBName == "") or (varHost == ""):
+      print ErrorSQL()
+      sys.exit()  
+    else:
+      global db
+      db = MySQLdb.connect(host=varHost,user=varUser,passwd=varPass,db=varDBName)
+      global cur
+      cur = db.cursor()
+      #cur.execute("SHOW TABLES")
+      CrearTabla()
 
 
 
-def CheckDB(suma):
-  querry = 'SELECT md5 FROM ' + tablaDB + 'WHERE md5="%s%"'
+
+
+
+def CheckDB(suma): # más que suma debe recibir la ruta del archivo como argumento
+  querry = """SELECT md5sum FROM tablaobs WHERE md5sum=%s"""
   cur.execute(querry,(suma))
-  if len(str(cur.fetchall()[0])) > 1:
+  if str(cur.fetchone()) == suma:
     return 1
   else:
     return 0
@@ -326,90 +425,75 @@ def CheckDB(suma):
 
 
 def GetData(url):
-  try:
-    fuente = pyfits.open(url)
-    listaCampos = fuente[0].header.keys()
-    cabecera = fuente[0].header
-    par = BuscaFyT(cabecera, listaCampos)
-    Instr = BuscaInstr(cabecera,listaCampos)
-    Telescopio = BuscarTelescopio(cabecera,listaCampos)
-    
-    if 'OSN' in Telescopio:
-      Observatorio = 'OSN'
-      Telescopio = Telescopio.replace('OSN','').strip(' ')
-    elif 'Sierra Nevada Observatory' in Telescopio:
-      Observatorio = 'OSN'
-      Telescopio = Telescopio.replace('Sierra Nevada Observatory','').strip(' ')
-    elif 'ESO' in Telescopio:
-      Observatorio = 'ESO'
-      Telescopio = Telescopio.replace('ESO-','').strip(' ')
-    elif 'IAC' in Telescopio:
-      Observatorio = 'IAC'
-    else:
-      Observatorio = BuscaObservatorio(cabecera,listaCampos)
-    ImgType = BuscaImgType(cabecera, listaCampos)
-    
-    if ClassifyImgType(ImgType, ruta) == 1:
-      Object = BuscaObject(cabecera,listaCampos)
-    else:
-      Object = 'Flat/Bias'
-    Filter = BuscaFilter(cabecera, listaCampos)
-    print par
-    print Object + ', ' + ImgType
-    print Observatorio +', ' + Telescopio + ', ' + Instr
-    #print '\t' + url
-
-
-    fuente.close()
-  except:
-    print "---> Error al abrir " + url
+  suma = HashFile(url)
+  if CheckDB(suma):
     pass
+  else:
+    try:
+      fuente = pyfits.open(url)
+      listaCampos = fuente[0].header.keys()
+      cabecera = fuente[0].header
+      par = BuscaFyT(cabecera, listaCampos)
+      Instr = BuscaInstr(cabecera,listaCampos)
+      Telescopio = BuscarTelescopio(cabecera,listaCampos)
+      
+      if 'OSN' in Telescopio:
+	Observatorio = 'OSN'
+	Telescopio = Telescopio.replace('OSN','').strip(' ')
+      elif 'Sierra Nevada Observatory' in Telescopio:
+	Observatorio = 'OSN'
+	Telescopio = Telescopio.replace('Sierra Nevada Observatory','').strip(' ')
+      elif 'ESO' in Telescopio:
+	Observatorio = 'ESO'
+	Telescopio = Telescopio.replace('ESO-','').strip(' ')
+      elif 'IAC' in Telescopio:
+	Observatorio = 'IAC'
+      else:
+	Observatorio = BuscaObservatorio(cabecera,listaCampos)
+      ImgType = BuscaImgType(cabecera, listaCampos)
+      
+      if ClassifyImgType(ImgType, ruta) == 1:
+	Object = BuscaObject(cabecera,listaCampos)
+      else:
+	Object = 'Flat/Bias'
+      Filter = BuscaFilter(cabecera, listaCampos)
 
-  
+      try:
+	from datetime import datetime
+	cur.execute("""INSERT INTO tablaobs VALUES ('NULL',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(datetime.utcnow(),suma,ImgType,Object,par[0],par[1],par[2],Observatorio,Telescopio,Instr,url))
+	db.commit()
+      except:
+	print "---> No se ha podido introducir los datos del archivo" + url
+	pass
+
+
+      fuente.close()
+    except:
+      print "---> Error al abrir " + url
+      pass
+
+
 
 if len(sys.argv) == 2:
   directorio_imagenes = sys.argv[1]
 elif len(sys.argv) > 2:
-  from termcolor import colored
-  print colored ("¡ERROR!", "red")
-  print "Solo se admite un único argumento: un directorio que contenga las imagenes"
-  print "del tipo .fits, .fit y/o .fts"
-  print " "
-  print "A continuación se muestra un ejemplo:"
-  print " "
-  print "$ ./extracampos.py rutaamidirectorio/"
-  print " "
-  print "Donde \"rutaamidirectorio/\" es la ruta desde donde se está ejecutando este"
-  print "programa hasta donde se encuentran las imágenes del tipo .fits, .fit y/o .fts"
-  print " "
-  print "Vuelva a intentarlo, por favor."
-  print " "
+  ErrorMuchosArg()
   sys.exit()
 elif len(sys.argv) == 1:
-  from termcolor import colored
-  print colored ("¡ERROR!", "red")
-  print "Para que el programa funcione correctamente tiene que añadirle un argumento."
-  print "A continuación se muestra un ejemplo:"
-  print " "
-  print "$ ./extracampos.py rutaamidirectorio/"
-  print " "
-  print "Donde \"rutaamidirectorio/\" es la ruta desde donde se está ejecutando este"
-  print "programa hasta donde se encuentran las imágenes del tipo .fits, .fit y/o .fts"
-  print " "
-  print "Vuelva a intentarlo, por favor."
-  print " "
+  ErrorNoArg()
   sys.exit()
 
-archivo_nombres_campos = "nombres_de_campos"
+IniciarDB()
+#archivo_nombres_campos = "nombres_de_campos"
 j = 0
 for (path, ficheros, archivos) in walk (directorio_imagenes):
   for file in archivos:
     if file.endswith(".fits") or file.endswith(".fit") or file.endswith(".fts"):
       ruta = path + '/' + file
       ruta = ruta.replace('//','/')
-      #AddCampos(ruta, archivo_nombres_campos)
-      HashFile(ruta)
-      #GetData(ruta)
+      #AddCampos(ruta, archivo_nombres_campos) # Antigua. Para listar todos los campos existentes
+      GetData(ruta)
+      
       j += 1
 
 

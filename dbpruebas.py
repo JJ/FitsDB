@@ -22,10 +22,12 @@ iniciodb()
 cur.execute('SELECT name, owner FROM pet')
 #for row in cur.fetchall():
   #print row
-  
-name = "Joselito"
-owner = "pacote"
-species = "perico"
+#cur.execute("SET NAMES 'utf8'")			# Esto en principio solo habría que ejecutarlo al crear la tabla
+#cur.execute("SET character_set_client = utf8")
+cur.execute("SET CHARACTER SET utf8")
+name = "Jesús"
+owner = "paquete"
+species = "pájaro"
 sex = "m"
 birth = "1949-05-24"
 death = ""
@@ -33,9 +35,17 @@ death = ""
 querry2 = "INSERT INTO pet VALUES (%s, %s, %s, %s, %s, %s)" 
 cur.execute(querry2,(name,owner,species,sex,birth,'NULL'))
 
-db.commit()
+#db.commit()			# Esta linea es fundamental porque es la que ordena la escritura de los cambios.
 cur.execute('SELECT * FROM pet')
 for row in cur.fetchall():
+  #row2[range(len(row))]
+  row=list(row)
+  #for i in (range(len(row)-2)):
+    #row[i]=row[i].decode('utf8','ignore')
+  k=0
+  row[k]=row[k].decode('utf8','ignore')
+  print row[k]
+  print row[4]
   print row
 
 #import time
