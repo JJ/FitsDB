@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python
 # -*- coding: utf8 -*-
 
 import MySQLdb
@@ -23,15 +23,12 @@ cur.execute('SELECT name, owner FROM pet')
 #for row in cur.fetchall():
   #print row
   
-name = "José"
-owner = "paco"
+name = "Joselito"
+owner = "pacote"
 species = "perico"
 sex = "m"
-birth = "1999-05-24"
+birth = "1949-05-24"
 death = ""
-querry = 'INSERT INTO pet VALUES (\'' + name + '\',\'' + owner + '\',\'' + species + '\',\'' + sex + '\',\'' + birth + '\',NULL);'
-print querry
-#cur.execute(querry)
 
 querry2 = "INSERT INTO pet VALUES (%s, %s, %s, %s, %s, %s)" 
 cur.execute(querry2,(name,owner,species,sex,birth,'NULL'))
