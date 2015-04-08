@@ -69,7 +69,8 @@ def CheckConfFileExistence():
   if os.path.exists("./config.cfg"):
     return 1
   elif not os.path.exists("./config.cfg"):
-    os.rename("./config.cfg.new","./config.cfg")
+    import shutil
+    shutil.copy("./config.cfg.new","./config.cfg")
     ErrorSQL()
     sys.exit()
 
