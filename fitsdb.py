@@ -377,6 +377,7 @@ def CrearTabla():
   observatory VARCHAR(80),
   telescope VARCHAR(80),
   instrument VARCHAR(80),
+  filter VARCHAR(50),
   rute VARCHAR(200) NOT NULL)""")
   cur.execute("SET NAMES 'utf8'")
   cur.execute("SET CHARACTER SET utf8")
@@ -460,7 +461,7 @@ def GetData(url):
 
       try:
 	from datetime import datetime
-	cur.execute("""INSERT INTO tablaobs VALUES ('NULL',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(datetime.utcnow(),suma,ImgType,Object,par[0],par[1],par[2],Observatorio,Telescopio,Instr,url))
+	cur.execute("""INSERT INTO tablaobs VALUES ('NULL',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(datetime.utcnow(),suma,ImgType,Object,par[0],par[1],par[2],Observatorio,Telescopio,Instr,Filter,url))
 	db.commit()
       except:
 	print "---> No se ha podido introducir los datos del archivo" + url
