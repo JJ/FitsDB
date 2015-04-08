@@ -412,8 +412,7 @@ def IniciarDB():
 
 
 def CheckDB(suma): # más que suma debe recibir la ruta del archivo como argumento
-  querry = """SELECT md5sum FROM tablaobs WHERE md5sum = %s"""
-  cur.execute(querry,(suma))
+  cur.execute('SELECT md5sum FROM tablaobs WHERE md5sum = %s',(suma,))
   if cur.fetchone():
     return 1
   else:
