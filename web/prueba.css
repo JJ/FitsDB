@@ -1,0 +1,9 @@
+table.zebra tbody tr:nth-child(2n+1) {
+  background-color: #e5ffc9;
+}
+table.zebra tbody tr:nth-child(2n) {
+  background-color: #fff5e3;
+}
+table.zebra th {
+  background-color: #d9fcff;
+}
