@@ -5,13 +5,57 @@ FitsDB v0.1.1-1
 </title>
 <link href="prueba.css" rel="stylesheet" type="text/css">
 <body>
+<?php
+/* creates a compressed zip file */
+function create_zip($files = array(),$destination = '',$overwrite = false) {
+	//if the zip file already exists and overwrite is false, return false
+	if(file_exists($destination) && !$overwrite) { return false; }
+	//vars
+	$valid_files = array();
+	//if files were passed in...
+	if(is_array($files)) {
+		//cycle through each file
+		foreach($files as $file) {
+			//make sure the file exists
+			if(file_exists($file)) {
+				$valid_files[] = $file;
+			}
+		}
+	}
+	//if we have good files...
+	if(count($valid_files)) {
+		//create the archive
+		$zip = new ZipArchive();
+		if($zip->open($destination,$overwrite ? ZIPARCHIVE::OVERWRITE : ZIPARCHIVE::CREATE) !== true) {
+			return false;
+		}
+		//add the files
+		foreach($valid_files as $file) {
+			$zip->addFile($file,$file);
+		}
+		//debug
+		//echo 'The zip archive contains ',$zip->numFiles,' files with a status of ',$zip->status;
+		
+		//close the zip -- done!
+		$zip->close();
+		
+		//check to make sure the file exists
+		return file_exists($destination);
+	}
+	else
+	{
+		return false;
+	}
+}
+?>
+
 <H1 align=center>Interfaz web de FitsDB</H1>
 
 <form id="form1" name="form1" method="post" action="prueba.php" align="right">
-  <table width="500" border="1" align="center">
+  <table width="600" border="0" align="center">
   <tr>
     <td width="200">ID:</td>
-    <td width="300">
+    <td width="200">
       <input type="text" name="idnum" id="idnum" />
     </td>
   </tr>
@@ -75,10 +119,16 @@ FitsDB v0.1.1-1
       <input type="text" name="filtro" id="filtro" />
     </td>
   </tr>
+  <tr><td> <br></td></tr>
   <tr>
-    <td><input type="reset" value="Limpiar formulario" /></td>
+    <td align='left'>
+      <input type="submit" name="enviar" id="enviar" value="Enviar consulta" />
+    </td>
+    <td align='center'>
+      <input type="reset" value="Limpiar formulario" />
+    </td>
     <td align="right">
-    <input type="submit" name="enviar" id="enviar" value="Enviar consulta" />
+	<input type="submit" name="enviar" id="enviar" value="Enviar consulta" />
     </td>
   </tr>
 </table>
@@ -154,16 +204,6 @@ $telescopio= strip_tags($_POST['telescopio']);
 $instrumento= strip_tags($_POST['instrumento']);
 $filtro= strip_tags($_POST['filtro']);
 
-// echo $nombre_obj;
-
-// if (strlen($nombre_obj) == 0)
-// {
-//   echo "vacio";
-// }
-// else
-// {
-// echo "_" . $nombre_obj . "_";
-// }
 
 
 $prefijo = "SELECT id, moddate, imgtype, object, dateobs, timeobs, exptime, observatory, telescope, instrument, filter, rute FROM tablaobs";
@@ -227,6 +267,7 @@ $conexion = new mysqli("127.0.0.1", "pablo", "halconmilenario", "pruebasdb");
 
 $resultado = $conexion->query($peticion);
 $resultado -> data_seek(0);
+$archivos = array();
 while ($fila = $resultado->fetch_assoc())
 {
   $filabuena = array_values($fila);
@@ -239,9 +280,34 @@ while ($fila = $resultado->fetch_assoc())
     echo "</td>";
   }
   echo "</tr>";
+  $archivos[] = $filabuena[$n-1];
 }
+$archivosbuenos = array_values($archivos);
 ?>
 </table>
+<!--<form id="form2" name="form2" method="post" action="./fitsdb/archivosfits.zip" align="right">
+// <?php
+// $archivozip = create_zip($archivosbuenos, './fitsdb/archivosfits.zip');
+// ?>
+<input type="button" name="descarga" id="descarga" value="Descargar datos" onClick="window.location.href='./fitsdb/archivosfits.zip'" />
+</form>-->
+
+<?php 
+if(isset($_POST['submit'])) { 
+// foo(); 
+$archivozip = create_zip($archivosbuenos, 'archivosfits.zip');
+header("Cache-Control: public");
+header("Content-Description: File Transfer");
+header("Content-Disposition: attachment; filename=archivosfits");
+header("Content-Type: application/zip");
+header("Content-Transfer-Encoding: binary");
+readfile('archivosfits.zip');
+} 
+?>
+
+<form action="<?=$_SERVER['PHP_SELF'];?>" method="post"> 
+<input type="submit" name="submit" value="Click Me"> 
+</form> 
 
 </body>
 </html>
