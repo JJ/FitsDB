@@ -69,7 +69,13 @@ function create_zip($files = array(),$destination = '',$overwrite = false) {
   <tr>
     <td>Tipo de imagen:</td>
     <td>
-      <input type="text" name="typeimg" id="idnum" />
+     <!-- <input type="text" name="typeimg" id="idnum" /> -->
+	<input type="text" name="product" list="productName"/>
+	<datalist id="productName">
+	<option value="Bias">Bias</option>
+	<option value="Flat">Flat</option>
+	<option value="Science">Science</option>
+</datalist>
     </td>
   </tr>
   <tr>
