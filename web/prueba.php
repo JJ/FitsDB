@@ -54,15 +54,16 @@ function create_zip($files = array(),$destination = '',$overwrite = false) {
 <form id="form1" name="form1" method="post" action="prueba.php" align="right">
   <table width="600" border="0" align="center">
   <tr>
-    <td width="200">ID:</td>
-    <td width="200">
+    <td width=40%>ID:</td>
+    <td width=60%>
       <input type="text" name="idnum" id="idnum" />
     </td>
   </tr>
   <tr>
     <td>Fecha de modificación:</td>
     <td>
-      <input type="text" name="fecha_mod" id="fecha_mod" />
+<!--       <input type="text" name="fecha_mod" id="fecha_mod" /> -->
+      <input type="date" name="fecha_mod1"></input> a <input type="date" name="fecha_mod2"></input>
     </td>
   </tr>
   <tr>
@@ -80,13 +81,15 @@ function create_zip($files = array(),$destination = '',$overwrite = false) {
   <tr>
     <td>Fecha de la observación:</td>
     <td>
-      <input type="text" name="fecha_obs" id="fecha_obs" />
+<!--       <input type="text" name="fecha_obs" id="fecha_obs" /> -->
+      <input type="date" name="fecha_obs1"></input> a <input type="date" name="fecha_obs2"></input>
     </td>
   </tr>
   <tr>
     <td>Hora de la observación:</td>
     <td>
-      <input type="text" name="tiempo_obs" id="tiempo_obs" />
+<!--       <input type="text" name="tiempo_obs" id="tiempo_obs" /> -->
+      <input type="time" name="tiempo_obs1"></input> a <input type="time" name="tiempo_obs2"></input>
     </td>
   </tr>
     <tr>
@@ -122,14 +125,16 @@ function create_zip($files = array(),$destination = '',$overwrite = false) {
   <tr><td> <br></td></tr>
   <tr>
     <td align='left'>
-      <input type="submit" name="enviar" id="enviar" value="Enviar consulta" />
+      <input type="reset" value="Limpiar formulario" />
+
     </td>
     <td align='center'>
-      <input type="reset" value="Limpiar formulario" />
+      <input type="submit" name="enviar" id="enviar" value="Enviar consulta" />
+
     </td>
-    <td align="right">
+    <!--<td align="right">
 	<input type="submit" name="enviar" id="enviar" value="Enviar consulta" />
-    </td>
+    </td>-->
   </tr>
 </table>
 </form>
@@ -193,11 +198,14 @@ function create_zip($files = array(),$destination = '',$overwrite = false) {
 <?php
 //Recibir
 $idnum = strip_tags($_POST['idnum']);
-$fecha_mod = strip_tags($_POST['fecha_mod']);
+$fecha_mod1 = strip_tags($_POST['fecha_mod1']);
+$fecha_mod2 = strip_tags($_POST['fecha_mod2']);
 $typeimg = strip_tags($_POST['typeimg']);
 $nombre_obj= strip_tags($_POST['nombre_obj']);
-$fecha_obs= strip_tags($_POST['fecha_obs']);
-$tiempo_obs= strip_tags($_POST['tiempo_obs']);
+$fecha_obs1= strip_tags($_POST['fecha_obs1']);
+$fecha_obs2= strip_tags($_POST['fecha_obs2']);
+$tiempo_obs1= strip_tags($_POST['tiempo_obs1']);
+$tiempo_obs2= strip_tags($_POST['tiempo_obs2']);
 $exptime= strip_tags($_POST['exptime']);
 $observatorio= strip_tags($_POST['observatorio']);
 $telescopio= strip_tags($_POST['telescopio']);
@@ -214,8 +222,8 @@ if (strlen($idnum) != 0) {
   $sufijo = $sufijo . sprintf(" id like '%%%s%%'",$idnum) ." and";
   }
 
-if (strlen($fecha_mod) != 0) {
-  $sufijo = $sufijo . sprintf(" moddate like '%%%s%%'",$fecha_mod) . " and";
+if ((strlen($fecha_mod1) != 0) && (strlen($fecha_mod2) != 0)) {
+  $sufijo = $sufijo . sprintf(" (moddate BETWEEN '%s ' AND '%s')", $fecha_mod1, $fecha_mod2) . " and";
   }
 
 if (strlen($typeimg) != 0) {
@@ -306,6 +314,7 @@ readfile('archivosfits.zip');
 ?>
 
 <form action="<?=$_SERVER['PHP_SELF'];?>" method="post"> 
+<input type="date"></input>
 <input type="submit" name="submit" value="Click Me"> 
 </form> 
 
