@@ -223,34 +223,33 @@ if (strlen($idnum) != 0) {
   }
 
 if ((strlen($fecha_mod1) != 0) && (strlen($fecha_mod2) != 0)) {
-  $sufijo = $sufijo . sprintf(" (moddate BETWEEN '%s ' AND '%s')", $fecha_mod1, $fecha_mod2) . " and";
+  $sufijo = $sufijo . sprintf(" (moddate BETWEEN '%s' AND '%s')", $fecha_mod1, $fecha_mod2) . " and";
   }
 
 if (strlen($typeimg) != 0) {
-  $sufijo = $sufijo . sprintf(" typeimg like '%%%s%%'",$typeimg) . " and";
+  $sufijo = $sufijo . sprintf(" imgtype like '%%%s%%'",$typeimg) . " and";
   }
-  
+
 if (strlen($nombre_obj) != 0) {
   $sufijo = $sufijo . sprintf(" object like '%%%s%%'",$nombre_obj) . " and";
   }
 
-if (strlen($fecha_obs) != 0) {
-  $sufijo = $sufijo . sprintf(" dateobs like '%%%s%%'",$fecha_obs) . " and";
+if ((strlen($fecha_obs1) != 0) && (strlen($fecha_obs2) != 0)) {
+  $sufijo = $sufijo . sprintf(" (dateobs BETWEEN '%s' AND '%s')", $fecha_obs1, $fecha_obs2) . " and";
   }
 
-if (strlen($tiempo_obs) != 0) {
-  $sufijo = $sufijo . sprintf(" timeobs like '%%%s%%'",$tiempo_obs) . " and";
+if ((strlen($tiempo_obs1) != 0) && (strlen($tiempo_obs2) != 0)) {
+  $sufijo = $sufijo . sprintf(" (timeobs BETWEEN '%s' AND '%s')", $tiempo_obs1, $tiempo_obs2) . " and";
   }
-  
+
 if (strlen($observatorio) != 0) {
   $sufijo = $sufijo . sprintf(" observatory like '%%%s%%'",$observatorio) . " and";
   }
-  
+
 
 if (strlen($telescopio) != 0) {
   $sufijo = $sufijo . sprintf(" telescope like '%%%s%%'",$telescopio) . " and";
   }
-
 
 if (strlen($instrumento) != 0) {
   $sufijo = $sufijo . sprintf(" instrument like '%%%s%%'",$instrumento) . " and";
@@ -260,7 +259,7 @@ if (strlen($filtro) != 0) {
 $sufijo = $sufijo . sprintf(" filter like '%%%s%%'",$filtro);
 }
 
-if ((strlen($idnum) != 0) || (strlen($fecha_mod) != 0) || (strlen($typeimg) != 0) || (strlen($nombre_obj) != 0) || (strlen($fecha_obs) != 0) || (strlen($tiempo_obs) != 0) || (strlen($observatorio) != 0) || (strlen($telescopio) != 0) || (strlen($instrumento) != 0) || (strlen($filtro) != 0)) {
+if ((strlen($idnum) != 0) || (strlen($fecha_mod1) != 0) || (strlen($fecha_mod2) != 0) || (strlen($typeimg) != 0) || (strlen($nombre_obj) != 0) || (strlen($fecha_obs1) != 0) || (strlen($fecha_obs2) != 0) || (strlen($tiempo_obs1) != 0) || (strlen($tiempo_obs2) != 0) || (strlen($observatorio) != 0) || (strlen($telescopio) != 0) || (strlen($instrumento) != 0) || (strlen($filtro) != 0)) {
   $montamos = $prefijo . " WHERE" . $sufijo;
   $peticion = preg_replace('/and$/', '', $montamos);
   }
