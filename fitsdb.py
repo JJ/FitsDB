@@ -262,7 +262,7 @@ def BuscarTelescopio(cabecera,listaCampos):
 
 
 
-def BuscaObservatorio2(cabecera,listaCampos): # Esta incluye coordenadas para los archivos sin observatorio
+def BuscaObservatorio2(cabecera,listaCampos): # Esta incluye coordenadas para los archivos sin observatorio WIP
   CamposObservatorio = ['OBSERVAT','ORIGIN']
   salida = 'UNK'
   for i in CamposObservatorio:
