@@ -319,8 +319,11 @@ def BuscaObject(cabecera,listaCampos):
 	break
   #print ruta
   #print listaCampos
-  # POSIBLE USO DE EXPRESIÓN REGULAR PARA FILTRAR NOMBRE \d{1,4}[A-Z]{1,3}\d{1,3}
-  return ruta.split('/')[-1]
+  # POSIBLE USO DE EXPRESIÓN REGULAR PARA FILTRAR NOMBRE \d{4}[ A-Za-z]{2,3}\d{1,3}
+  #import re
+  #posiblenombre = re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1]).group(0).replace(" ", "") + "--KK"
+  #return posiblenombre
+  return ruta.split('/')[-1].replace(" ", "")
 
 
 def ClassifyImgType(tipo, ruta):
