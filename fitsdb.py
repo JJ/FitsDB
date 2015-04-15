@@ -310,20 +310,55 @@ def BuscaObservatorio(cabecera,listaCampos):
 
 def BuscaObject(cabecera,listaCampos):
   CamposObject = ['OBJECT','OBJCAT']
-  evitamos = ['','flat','bias']
+  evitamos = ['','flat','bias','domme']
+  import re
   for i in CamposObject:
     if i in (s.rstrip(' ') for s in listaCampos):
       if cabecera[i].strip(' ').lower() not in evitamos:
 	#print ruta
+	#posiblenombre = re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}', cabecera[i]).group(0).replace(" ", "")
+	#if len(posiblenombre) != 0:
+	  #return posiblenombre
+	#else:
 	return cabecera[i]
 	break
   #print ruta
   #print listaCampos
   # POSIBLE USO DE EXPRESIÓN REGULAR PARA FILTRAR NOMBRE \d{4}[ A-Za-z]{2,3}\d{1,3}
-  #import re
+  
   #posiblenombre = re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1]).group(0).replace(" ", "") + "--KK"
-  #return posiblenombre
+  #if len(posiblenombre) > 5:
+    #otro = posiblenombre
+  #else:
+    #otro = ruta.split('/')[-1].replace(" ", "")
+  
   return ruta.split('/')[-1].replace(" ", "")
+  
+def BuscaObject2(cabecera,listaCampos):
+  CamposObject = ['OBJECT','OBJCAT']
+  evitamos = ['','flat','bias','domme']
+  import re
+  for i in CamposObject:
+    if i in (s.rstrip(' ') for s in listaCampos):
+      if cabecera[i].strip(' ').lower() not in evitamos:
+	#print ruta
+	posiblenombre = re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}', cabecera[i]).group(0).replace(" ", "")
+	if len(posiblenombre) != 0:
+	  return posiblenombre
+	else:
+	  return cabecera[i]
+	break
+  #print ruta
+  #print listaCampos
+  # POSIBLE USO DE EXPRESIÓN REGULAR PARA FILTRAR NOMBRE \d{4}[ A-Za-z]{2,3}\d{1,3}
+  
+  posiblenombre = re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1]).group(0).replace(" ", "") + "--KK"
+  if len(posiblenombre) > 5:
+    otro = posiblenombre
+  else:
+    otro = ruta.split('/')[-1].replace(" ", "")
+  
+  return otro
 
 
 def ClassifyImgType(tipo, ruta):
@@ -339,7 +374,7 @@ def ClassifyImgType(tipo, ruta):
   
   
 
-
+# Hay que unificar los tipos de imágenes
 def BuscaImgType(cabecera,listaCampos):
   CamposImgType = ['IMAGETYP']
   for i in CamposImgType:
@@ -369,7 +404,7 @@ def BuscaFilter(cabecera,listaCampos):
 #--------------------------
 
 
-def CrearTabla():
+def CrearTablaObs():
   cur.execute("""CREATE TABLE IF NOT EXISTS tablaobs
   (id BIGINT NOT NULL UNIQUE AUTO_INCREMENT,
   moddate TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -386,7 +421,6 @@ def CrearTabla():
   rute VARCHAR(200) NOT NULL)""")
   cur.execute("SET NAMES 'utf8'")
   cur.execute("SET CHARACTER SET utf8")
-  #db.commit()
 
 
 def IniciarDB():
@@ -408,7 +442,7 @@ def IniciarDB():
       global cur
       cur = db.cursor()
       #cur.execute("SHOW TABLES")
-      CrearTabla()
+      CrearTablaObs()
 
 
 
@@ -461,6 +495,7 @@ def GetData(url):
 	Object = BuscaObject(cabecera,listaCampos)
       else:
 	Object = 'Flat/Bias'
+	ImgType= 'Flat/Bias'
       Filter = BuscaFilter(cabecera, listaCampos)
 
       try:
@@ -490,6 +525,7 @@ elif len(sys.argv) == 1:
 
 IniciarDB()
 #archivo_nombres_campos = "nombres_de_campos"
+
 j = 0
 for (path, ficheros, archivos) in walk (directorio_imagenes):
   for file in archivos:
@@ -503,7 +539,7 @@ for (path, ficheros, archivos) in walk (directorio_imagenes):
 
 
 #Sort(archivo_nombres_campos)
-msgfin = "Se han procesados " + str(j) + " archivos.", "green"
+msgfin = "Se han procesado " + str(j) + " archivos.", "green"
 from termcolor import colored
 print colored (msgfin, "green")
 
