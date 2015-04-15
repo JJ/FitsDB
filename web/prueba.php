@@ -7,8 +7,8 @@ FitsDB v0.1.1-1
 <body>
 <?php
 session_start();
-error_reporting(E_ALL);
-ini_set('display_errors', true);
+//error_reporting(E_ALL);
+//ini_set('display_errors', true);
 ?>
 
 <?php
@@ -62,7 +62,7 @@ function create_zip($files = array(),$destination = '',$overwrite = false) {
   <tr>
     <td width=40%>ID:</td>
     <td width=60%>
-      <input type="text" name="idnum" id="idnum" autofocus />
+      <input type="number" name="idnum" id="idnum" autofocus />
     </td>
   </tr>
   <tr>
