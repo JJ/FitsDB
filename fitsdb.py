@@ -338,7 +338,6 @@ def BuscaObject2(cabecera,listaCampos):
 	break
   #print ruta
   #print listaCampos
-  # POSIBLE USO DE EXPRESIÓN REGULAR PARA FILTRAR NOMBRE \d{4}[ A-Za-z]{2,3}\d{1,3}
   
   posiblenombre = re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1]).group(0).replace(" ", "") + "--KK"
   if len(posiblenombre) > 5:
