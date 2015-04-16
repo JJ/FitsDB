@@ -1,3 +1,4 @@
 - Comprobar que la salida del foreach da la lectura del array correctamente.
 - Quitar restos de código comentado.
 - Cambiar nombre del archivo zip a uno dependiente del usuario para evitar que uno le pise a otro la descarga.
+- Cambiar compresión zip por tar (sin compresión) si el pc es lento.
