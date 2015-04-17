@@ -238,7 +238,7 @@ def BuscaFyT(cabecera,listaCampos):
 
 
 def BuscaInstr(cabecera,listaCampos): # Algunos archivos no tienen esta información
-  CamposInstr = ['INSTRID','INSTRKEY','INSTRUM','INSTRUME']
+  CamposInstr = ['INSTRID','INSTRKEY','INSTRUM','INSTRUME','DETECTOR']
   for i in CamposInstr:
     if i in (s.rstrip(' ') for s in listaCampos):
       if cabecera[i] != '':

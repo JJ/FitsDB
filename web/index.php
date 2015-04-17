@@ -16,77 +16,25 @@ limpieza('sesion/');
 <H1 align=center>Interfaz web de FitsDB</H1>
 
 <form id="form1" name="form1" method="post" action="index.php" align="right">
-  <table width="600" border="0" align="center">
-  <tr>
-    <td width=40%>ID:</td>
-    <td width=60%>
-      <input type="number" name="idnum" id="idnum" autofocus />
-    </td>
-  </tr>
-  <tr>
-    <td>Fecha de modificación:</td>
-    <td>
-<!--       <input type="text" name="fecha_mod" id="fecha_mod" /> -->
-      <input type="date" name="fecha_mod1" style="width: 140px;"></input> a <input type="date" name="fecha_mod2" style="width: 140px;"></input>
-    </td>
-  </tr>
-  <tr>
-    <td>Tipo de imagen:</td>
-    <td>
-     <!-- <input type="text" name="typeimg" id="idnum" /> -->
-	<input type="text" name="typeimg" list="listatipos" autocomplete/>
-	<datalist id="listatipos">
-	<option value="Bias">Bias</option>
-	<option value="Flat">Flat</option>
-	<option value="Science">Science</option>
-</datalist>
-    </td>
-  </tr>
+  <table width="900" border="0" align="center">
   <tr>
     <td>Nombre del objeto:</td>
     <td>
-<!--       <input type="text" name="nombre_obj" id="nombre_obj" /> -->
-	<input type="text" name="nombre_obj" list="listanombres_obj" autocomplete/>
+	<input type="text" name="nombre_obj" list="listanombres_obj" autocomplete autofocus/>
 	<datalist id="listanombres_obj">
-	<option value="Varuna">Varuna</option>
-	<option value="Eris">Eris</option>
-	<option value="Orcus">Orcus</option>
+	<?php
+	$arrayobjetos = array('Varuna','Orcus','Eris');
+	natsort($arrayobjetos);
+	foreach($arrayobjetos as $i){
+	  echo "<option value='".$i."'>".$i."</option>";
+	}
+	?>
+	</datalist>
     </td>
-  </tr>
-  <tr>
-    <td>Fecha de la observación:</td>
     <td>
-<!--       <input type="text" name="fecha_obs" id="fecha_obs" /> -->
-      <input type="date" name="fecha_obs1" style="width: 140px;"></input> a <input type="date" name="fecha_obs2" style="width: 140px;"></input>
     </td>
-  </tr>
-  <tr>
-    <td>Hora de la observación:</td>
-    <td>
-<!--       <input type="text" name="tiempo_obs" id="tiempo_obs" /> -->
-      <input type="time" name="tiempo_obs1" style="width: 140px;"></input> a <input type="time" name="tiempo_obs2" style="width: 140px;"></input>
     </td>
-  </tr>
-    <tr>
-    <td>Tiempo de exposición:</td>
     <td>
-      <input type="number" name="exptime1" id="exptime" step="10" style="width: 80px;" min="0"/> a <input type="number" name="exptime2" id="exptime" step="10" style="width: 80px;" min="0" />
-    </td>
-  </tr>
-    <tr>
-    <td>Observatorio:</td>
-    <td>
-<!--       <input type="text" name="observatorio" id="observatorio" /> -->
-	<input type="text" name="observatorio" list="listaobservatorio" autocomplete/>
-	<datalist id="listaobservatorio">
-	<option value="OSN">OSN</option>
-	<option value="DSAZ">DSAZ</option>
-	<option value="CGG">CGG</option>
-	<option value="Teide">Teide</option>
-	<option value="Atacama">Atacama</option>
-	<option value="IAC">IAC</option>
-	<option value="la Hita">la Hita</option>
-	<option value="lapalma">lapalma</option>
     </td>
   </tr>
     <tr>
@@ -94,11 +42,20 @@ limpieza('sesion/');
     <td>
       <input type="text" name="telescopio" id="telescopio" autocomplete />
     </td>
-  </tr>
-    <tr>
-    <td>Instrumento:</td>
+        <td>Instrumento:</td>
     <td>
       <input type="text" name="instrumento" id="instrumento" autocomplete />
+    </td>
+  </tr>
+  <tr>
+    <td>Fecha de la observación:</td>
+    <td>
+      <input type="date" name="fecha_obs1" style="width: 140px;"></input> a <input type="date" name="fecha_obs2" style="width: 140px;"></input>
+    </td>
+    <td>
+    </td>
+    </td>
+    <td>
     </td>
   </tr>
     <tr>
@@ -106,33 +63,89 @@ limpieza('sesion/');
     <td>
       <input type="text" name="filtro" id="filtro" autocomplete />
     </td>
+    <td>Tipo de imagen:</td>
+    <td>
+	<input type="text" name="typeimg" list="listatipos" autocomplete/>
+	<datalist id="listatipos">
+	<?php
+	$arraytipos = array('Flat/Domme','Bias/Dark','Science');
+	natsort($arraytipos);
+	foreach($arraytipos as $i){
+	  echo "<option value='".$i."'>".$i."</option>";
+	}
+	?>
+	</datalist>
+    </td>
   </tr>
-  <tr><td> <br></td></tr>
+    <tr>
+    <td>Tiempo de exposición:</td>
+    <td>
+      <input type="number" name="exptime1" id="exptime" step="10" style="width: 79px;" min="0"/> a <input type="number" name="exptime2" id="exptime" step="10" style="width: 79px;" min="0" />
+    </td>
+        </td>
+    <td>
+    </td>
+    </td>
+    <td>
+    </td>
+  </tr>
+
+    <tr>
+    <td>Observatorio:</td>
+    <td>
+	<input type="text" name="observatorio" list="listaobservatorio" autocomplete/>
+	<datalist id="listaobservatorio">
+	<?php
+	$arrayobservatorio = array('OSN','DSAZ','CGG','Teide','Atacama','IAC','la hita','lapalma');
+	natsort($arrayobservatorio);
+	foreach($arrayobservatorio as $i){
+	  echo "<option value='".$i."'>".$i."</option>";
+	}
+	?>
+	</datalist>
+    </td>
+    <td>
+    </td>
+    </td>
+    <td>
+    </td>
+  </tr>
   <tr>
-    <td align='left'>
-      <input type="reset" value="Limpiar formulario" />
-
+    <td>ID:</td>
+    <td>
+      <input type="number" name="idnum" id="idnum" />
     </td>
-    <td align='center'>
-      <input type="submit" name="enviar" id="enviar" value="Enviar consulta" />
-
+    <td>
     </td>
-    <td align="right">
-	
+    </td>
+    <td>
+    </td>
+  </tr>
+  <tr>
+    <td>
+    </td>
+    <td>
+    </td>
+    <td>
+    <input type="submit" name="enviar" id="enviar" value="Enviar consulta" />
+    </td>
+    <td>
     </td>
   </tr>
 </table>
 </form>
 <H2 align=center>Resultados</H2>
-<form id="form2" name="form2" method="get" action="download.php" align="right">
-<input type="submit" class ="button" name="descargar" value="descargar" />
+<form id="form2" name="form2" method="get" action="downloadzip.php" align="right">
+<input type="submit" class ="button" name="Descargar" value="Descargar archivos comprimidos" />
 </form>
+<br>
+<!--<form id="form2" name="form2" method="get" action="downloadtar.php" align="right">
+<input type="submit" class ="button" name="Descargar" value="Descargar archivos sin comprimir" />
+</form>-->
 
 <?php
 //Recibir
 $idnum = strip_tags($_POST['idnum']);
-$fecha_mod1 = strip_tags($_POST['fecha_mod1']);
-$fecha_mod2 = strip_tags($_POST['fecha_mod2']);
 $typeimg = strip_tags($_POST['typeimg']);
 $nombre_obj= strip_tags($_POST['nombre_obj']);
 $fecha_obs1= strip_tags($_POST['fecha_obs1']);
@@ -152,16 +165,12 @@ $filtro= strip_tags($_POST['filtro']);
 
 
 
-$prefijo = "SELECT id, moddate, imgtype, object, dateobs, timeobs, exptime, observatory, telescope, instrument, filter, rute FROM tablaobs";
+$prefijo = "SELECT id, object, telescope, instrument, dateobs, timeobs, filter, imgtype, exptime, observatory, rute FROM tablaobs";
 $sufijo = '';
 
 
 if (strlen($idnum) != 0) {
-  $sufijo = $sufijo . sprintf(" id like '%%%s%%'",$idnum) ." and";
-  }
-
-if ((strlen($fecha_mod1) != 0) && (strlen($fecha_mod2) != 0)) {
-  $sufijo = $sufijo . sprintf(" (moddate BETWEEN '%s' AND '%s')", $fecha_mod1, $fecha_mod2) . " and";
+  $sufijo = $sufijo . sprintf(" id = '%s'",$idnum) ." and";
   }
 
 if (strlen($typeimg) != 0) {
@@ -169,6 +178,7 @@ if (strlen($typeimg) != 0) {
   }
 
 if (strlen($nombre_obj) != 0) {
+  $nombre_obj = str_replace(' ', '', $nombre_obj);
   $sufijo = $sufijo . sprintf(" object like '%%%s%%'",$nombre_obj) . " and";
   }
 
@@ -176,10 +186,6 @@ if ((strlen($fecha_obs1) != 0) && (strlen($fecha_obs2) != 0)) {
   $sufijo = $sufijo . sprintf(" (dateobs BETWEEN '%s' AND '%s')", $fecha_obs1, $fecha_obs2) . " and";
   }
 
-if ((strlen($tiempo_obs1) != 0) && (strlen($tiempo_obs2) != 0)) {
-  $sufijo = $sufijo . sprintf(" (timeobs BETWEEN '%s' AND '%s')", $tiempo_obs1, $tiempo_obs2) . " and";
-  }
-  
 if ((strlen($exptime1) != 0) && (strlen($exptime2) != 0)) {
   $sufijo = $sufijo . sprintf(" (exptime BETWEEN '%s' AND '%s')", $exptime1, $exptime2) . " and";
   }
@@ -201,26 +207,24 @@ if (strlen($filtro) != 0) {
 $sufijo = $sufijo . sprintf(" filter like '%%%s%%'",$filtro);
 }
 
-if ((strlen($idnum) != 0) || (strlen($fecha_mod1) != 0) || (strlen($fecha_mod2) != 0) || (strlen($typeimg) != 0) || (strlen($nombre_obj) != 0) || (strlen($fecha_obs1) != 0) || (strlen($fecha_obs2) != 0) || (strlen($tiempo_obs1) != 0) || (strlen($tiempo_obs2) != 0) ||(strlen($exptime1) != 0) ||(strlen($exptime2) != 0) || (strlen($observatorio) != 0) || (strlen($telescopio) != 0) || (strlen($instrumento) != 0) || (strlen($filtro) != 0)) {
+if ((strlen($idnum) != 0) || (strlen($typeimg) != 0) || (strlen($nombre_obj) != 0) || (strlen($fecha_obs1) != 0) || (strlen($fecha_obs2) != 0) ||(strlen($exptime1) != 0) ||(strlen($exptime2) != 0) || (strlen($observatorio) != 0) || (strlen($telescopio) != 0) || (strlen($instrumento) != 0) || (strlen($filtro) != 0)) {
   $montamos = $prefijo . " WHERE" . $sufijo;
   $peticion = preg_replace('/and$/', '', $montamos);
   echo "<table width='500' align='left'><tr><td>Se muestra la siguiente petición:</td><td> </td></tr>";
-  echo "<tr><td>ID:</td><td>" . $idnum . "</td></tr>";
-  echo "<tr><td>Modificado entre:</td><td>" . $fecha_mod1 . " y " . $fecha_mod2 . "</td></tr>";
-  echo "<tr><td>Tipo de de imagen:</td><td>" . $typeimg . "</td></tr>";
   echo "<tr><td>Nombre del objeto:</td><td>" . $nombre_obj . "</td></tr>";
-  echo "<tr><td>Fecha de observación entre:</td><td>" . $fecha_obs1 . " y " . $fecha_obs2 . "</td></tr>";
-  echo "<tr><td>Hora de la observación entre:</td><td>" . $tiempo_obs1 . " y " . $tiempo_obs2 . "</td></tr>";
-  echo "<tr><td>Tiempo de exposición entre:</td><td>" . $exptime1 . " y " . $exptime2 . "</td></tr>";
-  echo "<tr><td>Observatorio:</td><td>" . $observatorio . "</td></tr>";
   echo "<tr><td>Telescopio:</td><td>" . $telescopio . "</td></tr>";
   echo "<tr><td>Instrumento:</td><td>" . $instrumento . "</td></tr>";
-  echo "<tr><td>Filtro:</td><td>" . $filtro . "</td></tr>";  
+  echo "<tr><td>Fecha de observación entre:</td><td>" . $fecha_obs1 . " y " . $fecha_obs2 . "</td></tr>";
+  echo "<tr><td>Filtro:</td><td>" . $filtro . "</td></tr>";
+  echo "<tr><td>Tipo de de imagen:</td><td>" . $typeimg . "</td></tr>";
+  echo "<tr><td>Tiempo de exposición entre:</td><td>" . $exptime1 . " y " . $exptime2 . "</td></tr>";
+  echo "<tr><td>Observatorio:</td><td>" . $observatorio . "</td></tr>";
+  echo "<tr><td>ID:</td><td>" . $idnum . "</td></tr>";
   echo "</table>";
   echo "<br>";
   }
 else {
-  $peticion = "SELECT id, moddate, imgtype, object, dateobs, timeobs, exptime, observatory, telescope, instrument, filter, rute FROM tablaobs WHERE DATE_SUB(CURDATE(), INTERVAL 31 DAY) <= dateobs ORDER BY dateobs DESC";
+  $peticion = "SELECT id, object, telescope, instrument, dateobs, timeobs, filter, imgtype, exptime, observatory, rute FROM tablaobs WHERE DATE_SUB(CURDATE(), INTERVAL 31 DAY) <= dateobs ORDER BY dateobs DESC";
   echo "<p>Se muestran las observaciones realizadas en los últimos 31 días.</p>";
   }
 
@@ -236,55 +240,39 @@ $archivos = array();
 <table border=0 align=center width=1850 class='zebra'>
   <thead>
     <tr align=center>
-      <br>
       <th width=1%>
 	ID
       </th>
-      <br>
-      <th width=9%>
-	Fecha Mod.
-      </th>
-      <br>
-      <th width=5%>
-	Tipo Img.
-      </th>
-      <br>
       <th width=9%>
 	Nombre
       </th>
-      <br>
-      <th width=5%>
+      <th width=6%>
+	Telescopio
+      </th>
+      <th width=10%>
+	Instrumento
+      </th>
+      <th width=6%>
 	Fecha Obs.
       </th>
-      <br>
+      <th width=6%>
+	Hora Obs.
+      </th>
       <th width=4%>
-	Tiempo Obs.
+	Filtro
       </th>
-      <br>
-      <th width=2%>
-	Exp.
+      <th width=5%>
+	Tipo Img.
       </th>
-      <br>
-      <th width=9%>
+      <th width=4%>
+	T. Exp.
+      </th>
+      <th width=14%>
 	Obs.
       </th>
-      <br>
-      <th width=6%>
-	Tele.
-      </th>
-      <br>
-      <th width=12%>
-	Instr.
-      </th>
-      <br>
-      <th width=4%>
-	Filtro.
-      </th>
-      <br>
-      <th width=50%>
+      <th width=35%>
 	Ruta
       </th>
-      <br>
     </tr>
   </thead>
 <?php
