@@ -9,55 +9,13 @@ FitsDB v0.1.1-1
 session_start();
 //error_reporting(E_ALL);
 //ini_set('display_errors', true);
-?>
-
-<?php
-/* creates a compressed zip file */
-function create_zip($files = array(),$destination = '',$overwrite = false) {
-	//if the zip file already exists and overwrite is false, return false
-	if(file_exists($destination) && !$overwrite) { return false; }
-	//vars
-	$valid_files = array();
-	//if files were passed in...
-	if(is_array($files)) {
-		//cycle through each file
-		foreach($files as $file) {
-			//make sure the file exists
-			if(file_exists($file)) {
-				$valid_files[] = $file;
-			}
-		}
-	}
-	//if we have good files...
-	if(count($valid_files)) {
-		//create the archive
-		$zip = new ZipArchive();
-		if($zip->open($destination,$overwrite ? ZIPARCHIVE::OVERWRITE : ZIPARCHIVE::CREATE) !== true) {
-			return false;
-		}
-		//add the files
-		foreach($valid_files as $file) {
-			$zip->addFile($file,$file);
-		}
-		//debug
-		//echo 'The zip archive contains ',$zip->numFiles,' files with a status of ',$zip->status;
-		
-		//close the zip -- done!
-		$zip->close();
-		
-		//check to make sure the file exists
-		return file_exists($destination);
-	}
-	else
-	{
-		return false;
-	}
-}
+limpieza('descargas/');
+limpieza('sesion/');
 ?>
 
 <H1 align=center>Interfaz web de FitsDB</H1>
 
-<form id="form1" name="form1" method="post" action="prueba.php" align="right">
+<form id="form1" name="form1" method="post" action="index.php" align="right">
   <table width="600" border="0" align="center">
   <tr>
     <td width=40%>ID:</td>
@@ -331,6 +289,7 @@ $archivos = array();
   </thead>
 <?php
 $archivos = array();
+$salida = fopen('sesion/fitsdb_' . session_id(),'w');
 while ($fila = $resultado->fetch_assoc())
 {
   $filabuena = array_values($fila);
@@ -343,57 +302,34 @@ while ($fila = $resultado->fetch_assoc())
     echo "</td>";
   }
   echo "</tr>";
-  $archivos[] = $filabuena[$n-1];
+  $archivo = str_replace('/home/pablo/proyectoBD/FitsDB/','',$filabuena[$n-1]);
+//   $archivo = $filabuena[$n-1];
+  fwrite($salida,$archivo.PHP_EOL);
+//   file_put_contents(,$archivo);
 }
-$archivosbuenos = array();
-$archivosbuenos = array_values($archivos);
-file_put_contents('sesion/fitsdb_' . session_id(),print_r($archivosbuenos, TRUE));
+fclose($salida);
+// foreach($archivos as $linea){
+// file_put_contents('sesion/fitsdb_' . session_id(),print_r($linea, TRUE));
+// }
 
 ?>
 </table>
 
 
 <?php
-if(isset($_GET['descargar'])){
-	descargar();
-	/*$archivosbuenos = array_values($archivos);
-        $m = count($archivos);
-        echo $m;
-        for ($j=0;$j<$m;$j++){
-  echo $archivosbuenos[$j];// . "<br>";
-}*/
-        
+
+  
+Function limpieza($direccion){
+if (file_exists($direccion)){
+  $path = $direccion;
+    if ($handle = opendir($path)) {
+      while (false !== ($file = readdir($handle))) {
+	  if ((time()-filectime($path.$file)) >= 86400) {
+	    unlink($path.$file);
+	  }
+      }
     }
-
-function descargar(){
-// echo "<H1>hola!!</H1>";
-$files = file('sesion/fitsdb_' . session_id());
-$m = count($files);
-// foreach ($files as $ey){
-// echo $ey;
-// }
-echo "<H1>hola2!!</H1>";
-// for ($j=0;$j<$m;$j++)
-// {
-//   echo $files[$j];// . "<br>";
-// }
-// echo "<H1>hola3!!</H1>";
-// $zipname = 'archivosfits.zip';
-// $zip = new ZipArchive;
-// $zip->open($zipname, ZipArchive::OVERWRITE);
-// if (is_array($files)){
-// foreach ($files as $file) {
-//   echo $file;
-//   $zip->addFile($file);
-// }
-// }
-// $zip->close();
-
-//Then download the zipped file.
-// header('Content-Type: application/zip');
-// header('Content-disposition: attachment; filename='.$zipname);
-// header('Content-Length: ' . filesize($zipname));
-// readfile($zipname);
+  }
 }
 ?>
 

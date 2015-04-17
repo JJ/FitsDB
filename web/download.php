@@ -1,30 +1,44 @@
 
 <?php
 session_start();
-//$files = file('sesion/fitsdb_' . session_id());
-$files = array('23dec12_017.fit','prueba.php');
-$zipname = 'archivosfits.zip';
+$files = array();
+$files = file('sesion/fitsdb_' . session_id());
+// $files = array('23dec12_017.fit','ImagenesPrueba/2003EL61-010R.fit');
+
+
 $zip = new ZipArchive();
-$zip->open($zipname, ZipArchive::CREATE);
-foreach ($files as $file) {
-  $zip->addFile($file);
+if (!file_exists('descargas/')){
+  mkdir('descargas/',0777);
+  if(!file_exists(date('d'))){
+    mkdir('descargas/' . date('d') ,0777);
+  }
 }
+$path = 'descargas/' . date('d') . '/';
+$num = 0;
+$zipname = 'archivosfits' . $num . '.zip';
+
+while (file_exists($path . $zipname)){
+  $num++;
+  $zipname = 'archivosfits' . $num . '.zip';
+}
+
+$zip->open($path . $zipname, ZipArchive::CREATE);
+ foreach ($files as $file) {
+ $bueno = trim($file);
+  if (is_readable($bueno)){
+    $zip->addFile($bueno);
+  }
+}
+
 $zip->close();
 
 
 header('Content-Type: application/zip');
-header('Content-disposition: attachment; filename=archivosfits.zip');
+header('Content-disposition: attachment; filename=' . $zipname);
 //$size = filesize('archivosfits.zip');
 //header('Content-Length: ' . $size);
 
-readfile('archivosfits.zip');
+readfile($path . $zipname);
 
-// $files = file('sesion/fitsdb_' . session_id());
-// $m = count($files);
-// echo $m . "<br>";
-// foreach ($files as $ey){
-// echo $ey;
-// }
-// echo $files[0];
 ?>
 
