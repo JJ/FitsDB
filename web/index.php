@@ -239,17 +239,22 @@ $archivos = array();
 ?>
 <table border=0 align=center width=1850 class='zebra'>
   <thead>
-    <tr align=center>
-      <th width=1%>
+    <tr align='center'>
+	<th width=1%>
+	<form id="form2" name="form2">
+		<input type="checkbox" name="marcartodos" value="probando">
+	</form>
+	</th>
+      <th width=3%>
 	ID
       </th>
-      <th width=9%>
+      <th width=7%>
 	Nombre
       </th>
       <th width=6%>
 	Telescopio
       </th>
-      <th width=10%>
+      <th width=9%>
 	Instrumento
       </th>
       <th width=6%>
@@ -283,15 +288,24 @@ while ($fila = $resultado->fetch_assoc())
   $filabuena = array_values($fila);
   echo "<tr>";
   $n = count($filabuena);
-  for ($i=0;$i<$n;$i++)
+  for ($i=-1;$i<$n;$i++)
   {
-    echo "<td>";
-    echo $filabuena[$i];
-    echo "</td>";
+	if($i == -1){
+		echo "<td align='center'>";
+		echo "<form id='form2' name='form2'>";
+		echo "<input type='checkbox' name='selector' value='aqui pondría la ruta'>";
+		echo "</form>";
+		echo "</td>";
+	}
+	else{
+		echo "<td>";
+		echo $filabuena[$i];
+		echo "</td>";
+	}
   }
   echo "</tr>";
-  $archivo = str_replace('/home/pablo/proyectoBD/FitsDB/','',$filabuena[$n-1]);
-//   $archivo = $filabuena[$n-1];
+//  $archivo = str_replace('/home/pablo/proyectoBD/FitsDB/','',$filabuena[$n-1]);
+   $archivo = $filabuena[$n-1];
   fwrite($salida,$archivo.PHP_EOL);
 //   file_put_contents(,$archivo);
 }
