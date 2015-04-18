@@ -444,6 +444,13 @@ def CheckDB(suma): # más que suma debe recibir la ruta del archivo como argumen
     return 0
 
 
+def CheckDB2(ruta): # más que suma debe recibir la ruta del archivo como argumento
+  cur.execute('SELECT rute FROM tablaobs WHERE rute = %s',(os.path.abspath(ruta),))
+  if cur.fetchone():
+    return 1
+  else:
+    return 0
+
 
 
 #--------------------------
@@ -451,8 +458,8 @@ def CheckDB(suma): # más que suma debe recibir la ruta del archivo como argumen
 
 
 def GetData(url):
-  suma = HashFile(url)
-  if CheckDB(suma):
+  #suma = HashFile(url)
+  if CheckDB2(url):
     pass
   else:
     try:
