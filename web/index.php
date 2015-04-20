@@ -6,12 +6,31 @@ FitsDB v0.1.1-1
 <link href="prueba.css" rel="stylesheet" type="text/css">
 <body>
 <?php
-session_start();
+// session_start();
 //error_reporting(E_ALL);
 //ini_set('display_errors', true);
 limpieza('descargas/');
-limpieza('sesion/');
+// limpieza('sesion/');
 ?>
+
+<script language="JavaScript">
+function cambiar(){
+  var cajamaestra = document.forms['form2'].elements['marcartodos'];
+  var lista = document.getElementsByClassName('A');
+  if (cajamaestra.checked){
+  // alert('Ahora está marcado');
+    for (var i=0; i < lista.length; i++){
+      lista[i].checked = true;
+    }
+  }
+  else{
+  // alert('Ahora no está marcado');
+    for (var i=0; i < lista.length; i++){
+      lista[i].checked = false;
+    }
+  }
+}
+</script>
 
 <H1 align=center>Interfaz web de FitsDB</H1>
 
@@ -135,9 +154,7 @@ limpieza('sesion/');
 </table>
 </form>
 <H2 align=center>Resultados</H2>
-<form id="form2" name="form2" method="get" action="downloadzip.php" align="right">
-<input type="submit" class ="button" name="Descargar" value="Descargar archivos comprimidos" />
-</form>
+
 <br>
 <!--<form id="form2" name="form2" method="get" action="downloadtar.php" align="right">
 <input type="submit" class ="button" name="Descargar" value="Descargar archivos sin comprimir" />
@@ -150,8 +167,8 @@ $typeimg = strip_tags($_POST['typeimg']);
 $nombre_obj= strip_tags($_POST['nombre_obj']);
 $fecha_obs1= strip_tags($_POST['fecha_obs1']);
 $fecha_obs2= strip_tags($_POST['fecha_obs2']);
-$tiempo_obs1= strip_tags($_POST['tiempo_obs1']);
-$tiempo_obs2= strip_tags($_POST['tiempo_obs2']);
+// $tiempo_obs1= strip_tags($_POST['tiempo_obs1']);
+// $tiempo_obs2= strip_tags($_POST['tiempo_obs2']);
 $exptime1= strip_tags($_POST['exptime1']);
 $exptime2= strip_tags($_POST['exptime2']);
 $observatorio= strip_tags($_POST['observatorio']);
@@ -237,13 +254,13 @@ $resultado = $conexion->query($peticion);
 $resultado -> data_seek(0);
 $archivos = array();
 ?>
+<form id="form2" name="form2" method="post" action="downloadzip.php" align="right">
+<input type="submit" class ="button" name="Descargar" value="Descargar archivos comprimidos" />
 <table border=0 align=center width=1850 class='zebra'>
   <thead>
     <tr align='center'>
 	<th width=1%>
-	<form id="form2" name="form2">
-		<input type="checkbox" name="marcartodos" value="probando">
-	</form>
+	    <input type="checkbox" name="marcartodos" onClick="cambiar()">
 	</th>
       <th width=3%>
 	ID
@@ -282,7 +299,10 @@ $archivos = array();
   </thead>
 <?php
 $archivos = array();
-$salida = fopen('sesion/fitsdb_' . session_id(),'w');
+/*if (is_dir('sesion/') === false){
+  mkdir('sesion/',0777);
+}
+$salida = fopen('sesion/fitsdb_' . session_id(),'w')*/;
 while ($fila = $resultado->fetch_assoc())
 {
   $filabuena = array_values($fila);
@@ -292,9 +312,7 @@ while ($fila = $resultado->fetch_assoc())
   {
 	if($i == -1){
 		echo "<td align='center'>";
-		echo "<form id='form2' name='form2'>";
-		echo "<input type='checkbox' name='selector' value='aqui pondría la ruta'>";
-		echo "</form>";
+		printf("<input type='checkbox' class='A' name='selector[]' checked value='%s'>",$filabuena[$n-1]);
 		echo "</td>";
 	}
 	else{
@@ -305,33 +323,55 @@ while ($fila = $resultado->fetch_assoc())
   }
   echo "</tr>";
 //  $archivo = str_replace('/home/pablo/proyectoBD/FitsDB/','',$filabuena[$n-1]);
-   $archivo = $filabuena[$n-1];
-  fwrite($salida,$archivo.PHP_EOL);
+//    $archivo = $filabuena[$n-1];
+//   fwrite($salida,$archivo.PHP_EOL);
 //   file_put_contents(,$archivo);
 }
-fclose($salida);
+// fclose($salida);
 // foreach($archivos as $linea){
 // file_put_contents('sesion/fitsdb_' . session_id(),print_r($linea, TRUE));
 // }
 
 ?>
 </table>
-
+</form>
 
 <?php
 
   
-Function limpieza($direccion){
-if (file_exists($direccion)){
-  $path = $direccion;
-    if ($handle = opendir($path)) {
-      while (false !== ($file = readdir($handle))) {
-	  if ((time()-filectime($path.$file)) >= 86400) {
-	    unlink($path.$file);
-	  }
-      }
+// Function limpieza($direccion){
+// if (file_exists($direccion)){
+//   $path = $direccion;
+//     if ($handle = opendir($path)) {
+//       while (false !== ($file = readdir($handle))) {
+// 	  if ((time()-filectime($path.$file)) <= 86400) {
+// 	    unlink($path.$file);
+// 	  }
+//       }
+//     }
+//   }
+// }
+
+function limpieza($path)
+{
+    if ((is_dir($path) === true) and ((time()-filemtime($path)) > 86400 ))
+    {
+        $files = array_diff(scandir($path), array('.', '..'));
+
+        foreach ($files as $file)
+        {
+            limpieza(realpath($path) . '/' . $file);
+        }
+
+        return rmdir($path);
     }
-  }
+
+    else if (is_file($path) === true)
+    {
+        return unlink($path);
+    }
+
+    return false;
 }
 ?>
 
