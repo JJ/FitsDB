@@ -156,9 +156,6 @@ function cambiar(){
 <H2 align=center>Resultados</H2>
 
 <br>
-<!--<form id="form2" name="form2" method="get" action="downloadtar.php" align="right">
-<input type="submit" class ="button" name="Descargar" value="Descargar archivos sin comprimir" />
-</form>-->
 
 <?php
 //Recibir
@@ -254,8 +251,9 @@ $resultado = $conexion->query($peticion);
 $resultado -> data_seek(0);
 $archivos = array();
 ?>
-<form id="form2" name="form2" method="post" action="downloadzip.php" align="right">
-<input type="submit" class ="button" name="Descargar" value="Descargar archivos comprimidos" />
+<form id="form2" name="form2" method="post" action="download.php" align="right">
+<input type="submit" class ="button" name="descargazip" value="Descargar archivos comprimidos" />
+<!-- <input type="submit" class ="button" name="descargatar" value="Descargar sin comprimir" /> -->
 <table border=0 align=center width=1850 class='zebra'>
   <thead>
     <tr align='center'>
