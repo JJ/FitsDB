@@ -35,7 +35,7 @@ if ($_POST['descargazip']){
       $n = count($lista);
       $nuevo = '';
       for ($j=$p;$j>0;$j--){
-	$nuevo= $nuevo.$lista[$n-$j].'/';
+	$nuevo= $nuevo.'/'.$lista[$n-$j];
       }
       $zip->addFile($bueno,$nuevo);
     }
