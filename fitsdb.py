@@ -116,16 +116,6 @@ def HashFile(ruta):
   return hasher.hexdigest()
 
 
-# SIN TERMINAR
-#def GenCsvWithHeaders(sitio, name):
-  #url = sitio + "/" + name
-  #url = url.replace('//','/')
-  #listaDatos = pyfits.open(url)
-  #salida = "salida.csv"
-  #CheckFileExistence(salida)
-  #f = open('salida.csv','w')
-  #for campo in listaDatos[0].header.keys():
-    #print listaDatos[0].header[campo]
 
 def JD2Date(entrada):
   from astropy.time import Time
@@ -458,7 +448,7 @@ def CheckDB2(ruta): # más que suma debe recibir la ruta del archivo como argume
 
 
 def GetData(url):
-  #suma = HashFile(url)
+  suma = HashFile(url)
   if CheckDB2(url):
     pass
   else:
@@ -497,7 +487,7 @@ def GetData(url):
 	cur.execute("""INSERT INTO tablaobs VALUES ('NULL',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(datetime.utcnow(),suma,ImgType,Object,par[0],par[1],par[2],Observatorio,Telescopio,Instr,Filter,os.path.abspath(url)))
 	db.commit()
       except:
-	print "---> No se ha podido introducir los datos del archivo" + url
+	print "---> No se ha podido introducir los datos del archivo: " + url
 	pass
 
 
