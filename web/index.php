@@ -258,7 +258,7 @@ $archivos = array();
   <thead>
     <tr align='center'>
 	<th width=1%>
-	    <input type="checkbox" name="marcartodos" onClick="cambiar()">
+	    <input type="checkbox" name="marcartodos" onClick="cambiar()" checked>
 	</th>
       <th width=3%>
 	ID
