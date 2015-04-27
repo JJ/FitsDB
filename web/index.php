@@ -3,8 +3,9 @@
 <title>
 FitsDB v0.1.1-1
 </title>
-<link href="prueba.css" rel="stylesheet" type="text/css">
+<link href="estilo.css" rel="stylesheet" type="text/css">
 <body>
+<div id='main'>
 <?php
 // session_start();
 //error_reporting(E_ALL);
@@ -327,10 +328,12 @@ if ((strlen($idnum) != 0) || (strlen($typeimg) != 0) || (strlen($nombre_obj) != 
 //   echo "<tr><td>ID:</td><td>" . $idnum . "</td></tr>";
 //   echo "</table>";
 //   echo "<br>";
+
+echo "Se muestran los resultados de su consulta.";
   }
 else {
   $peticion = "SELECT id, object, telescope, instrument, dateobs, timeobs, filter, imgtype, exptime, observatory, rute FROM tablaobs WHERE DATE_SUB(CURDATE(), INTERVAL 31 DAY) <= dateobs ORDER BY dateobs DESC";
-//   echo "<p>Se muestran las observaciones realizadas en los últimos 31 días.</p>";
+   echo "<p>Se muestran las observaciones realizadas en los últimos 31 días.</p>";
   }
 
   
@@ -345,6 +348,9 @@ $archivos = array();
 <form id="form2" name="form2" method="post" action="download.php" align="right">
 <input type="submit" class ="button" name="descargazip" value="Descargar archivos comprimidos" />
 <!-- <input type="submit" class ="button" name="descargatar" value="Descargar sin comprimir" /> -->
+
+<br>
+<br>
 <table border=0 align=center width=1850 class='zebra'>
   <thead>
     <tr align='center'>
@@ -424,7 +430,13 @@ while ($fila = $resultado->fetch_assoc())
 ?>
 </table>
 </form>
-
+</div>
+<div id='autor'>
+<p align='center'> 
+Autor: Juan Pablo Navarro Sánchez <br>
+<b>FitsDB</b> se publica bajo licencia GPLv2. en <A href='https://github.com/helfio/FitsDB'>Github</A>
+</p>
+</div>
 <?php
 
   

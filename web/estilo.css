@@ -1,3 +1,12 @@
+html, body {
+height: 98%;
+}
+
+#main{
+min-height: 92%;
+margin-bottom: 50px;
+}
+
 table.zebra tbody tr:nth-child(2n+1) {
   background-color: #e5ffc9;
 }
@@ -6,4 +15,11 @@ table.zebra tbody tr:nth-child(2n) {
 }
 table.zebra th {
   background-color: #d9fcff;
+}
+
+#autor{
+height: 50px;
+background: #d9fcff;
+position: float;
+margin-bottom: 0px;
 }
