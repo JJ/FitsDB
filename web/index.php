@@ -7,6 +7,7 @@ FitsDB v0.1.1-1
 <body>
 <div id='main'>
 <?php
+set_time_limit(0);
 // session_start();
 //error_reporting(E_ALL);
 //ini_set('display_errors', true);
