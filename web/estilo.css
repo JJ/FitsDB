@@ -7,6 +7,10 @@ min-height: 92%;
 margin-bottom: 50px;
 }
 
+table.zebra{
+width-min:1850px;
+}
+
 table.zebra tbody tr:nth-child(2n+1) {
   background-color: #e5ffc9;
 }

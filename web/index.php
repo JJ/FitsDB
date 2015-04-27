@@ -351,7 +351,7 @@ $archivos = array();
 
 <br>
 <br>
-<table border=0 align=center width=1850 class='zebra'>
+<table border=0 align=center class='zebra'>
   <thead>
     <tr align='center'>
 	<th width=1%>
