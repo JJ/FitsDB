@@ -3,8 +3,8 @@ height: 98%;
 }
 
 #main{
-min-height: 92%;
-margin-bottom: 50px;
+min-height: 95%;
+margin-bottom: 25px;
 }
 
 table.zebra{
@@ -22,7 +22,7 @@ table.zebra th {
 }
 
 #autor{
-height: 50px;
+height: 25px;
 background: #d9fcff;
 position: float;
 margin-bottom: 0px;

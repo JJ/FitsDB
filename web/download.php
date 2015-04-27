@@ -32,7 +32,7 @@ if ($_POST['descargazip']){
   $bueno = trim($file);
     if (is_readable($bueno)){
       $lista = explode('/',$file);
-      $p = 4; //Profundidad
+      $p = 3; //Profundidad
       $n = count($lista);
       $nuevo = '';
       for ($j=$p;$j>0;$j--){

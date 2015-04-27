@@ -436,7 +436,7 @@ while ($fila = $resultado->fetch_assoc())
 </div>
 <div id='autor'>
 <p align='center'> 
-Autor: Juan Pablo Navarro Sánchez <br>
+<!--Autor: Juan Pablo Navarro Sánchez <br>-->
 <b>FitsDB</b> se publica bajo licencia GPLv2. Código fuente en <A href='https://github.com/helfio/FitsDB'>Github.</A>
 </p>
 </div>
