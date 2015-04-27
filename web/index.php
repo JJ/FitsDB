@@ -257,7 +257,8 @@ function cambiar(){
     <input type="submit" name="enviar" id="enviar" value="Enviar consulta" />
     </td>
     <td>
-    <input type="reset" id="reset" value="Limpiar formulario" />
+<!--     <input type="reset" id="reset" value="Limpiar formulario" /> -->
+    <input type="button" id="reset2" value="Limpiar formulario" onClick='window.location.reload()' />
     </td>
     <td>
     </td>
@@ -434,7 +435,7 @@ while ($fila = $resultado->fetch_assoc())
 <div id='autor'>
 <p align='center'> 
 Autor: Juan Pablo Navarro Sánchez <br>
-<b>FitsDB</b> se publica bajo licencia GPLv2. en <A href='https://github.com/helfio/FitsDB'>Github</A>
+<b>FitsDB</b> se publica bajo licencia GPLv2. Código fuente en <A href='https://github.com/helfio/FitsDB'>Github.</A>
 </p>
 </div>
 <?php
