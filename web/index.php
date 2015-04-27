@@ -8,6 +8,7 @@ FitsDB v0.1.1-1
 <div id='main'>
 <?php
 set_time_limit(0);
+define('DEBUG', false);
 // session_start();
 //error_reporting(E_ALL);
 //ini_set('display_errors', true);
@@ -163,7 +164,7 @@ function cambiar(){
 	?>
 	<datalist id="listatipos">
 	<?php
-	$arraytipos = array('Flat/Domme','Bias/Dark','Science');
+	$arraytipos = array('Flat', 'Domme','Bias', 'Dark','Science');
 	natsort($arraytipos);
 	foreach($arraytipos as $i){
 	  echo "<option value='".$i."'>".$i."</option>";
@@ -178,20 +179,20 @@ function cambiar(){
 <!--       <input type="number" name="exptime1" id="exptime1" step="10" style="width: 79px;" min="0"/> -->
       	<?php
 	if (strlen($exptime1)>0){
-	echo "<input type='number' name='exptime1' id='exptime1' step='10' style='width 79px;' min='0' value='".$exptime1."'/>";
+	echo "<input type='number' name='exptime1' id='exptime1' step='10' style='width: 79px;' min='0' value='".$exptime1."'/>";
 	}
 	else{
-	echo "<input type='number' name='exptime1' id='exptime1' step='10' style='width 79px;' min='0' />";
+	echo "<input type='number' name='exptime1' id='exptime1' step='10' style='width: 79px;' min='0' />";
 	}
 	?>
       a 
 <!--       <input type="number" name="exptime2" id="exptime2" step="10" style="width: 79px;" min="0" /> -->
       	<?php
 	if (strlen($exptime2)>0){
-	echo "<input type='number' name='exptime2' id='exptime2' step='10' style='width 79px;' min='0' value='".$exptime2."'/>";
+	echo "<input type='number' name='exptime2' id='exptime2' step='10' style='width: 79px;' min='0' value='".$exptime2."'/>";
 	}
 	else{
-	echo "<input type='number' name='exptime2' id='exptime2' step='10' style='width 79px;' min='0' />";
+	echo "<input type='number' name='exptime2' id='exptime2' step='10' style='width: 79px;' min='0' />";
 	}
 	?>
 

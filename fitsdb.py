@@ -473,13 +473,15 @@ def GetData(url):
 	Observatorio = 'IAC'
       else:
 	Observatorio = BuscaObservatorio(cabecera,listaCampos)
+      ImgType = 'UNK'
+      Object = 'UNK'
       ImgType = BuscaImgType(cabecera, listaCampos)
       
-      if ClassifyImgType(ImgType, ruta) == 1:
-	Object = BuscaObject(cabecera,listaCampos)
-      else:
-	Object = 'Flat/Bias'
-	ImgType= 'Flat/Bias'
+      #if ClassifyImgType(ImgType, ruta) == 1:
+	#Object = BuscaObject(cabecera,listaCampos)
+      #else:
+	#Object = 'Flat/Bias'
+	#ImgType= 'Flat/Bias'
       Filter = BuscaFilter(cabecera, listaCampos)
 
       try:
