@@ -1,6 +1,9 @@
 # TODO
 
 - La función BuscaTyF funciona mal porque modifica el array par en lugar de devolverlo. Hay que solucionar eso. Hay que asegurarse de que solo recurre a FechaDelNombre cuando no ha encontrado la fecha entre los campos.
-- BuscaCosasEnCadena no funciona correctamente
-- BuscaObject2 no funciona correctamente
+- Muchas veces no se encuentra el tiempo de exposición. No estoy seguro si esto se podrá mejorar o no.
+- BuscaObject2 no funciona correctamente +Podría estar resuelto+
 - Hay que mejorar la obtención del tipo de imagen
+- En los nombres de objetos según nomenclatura hay muchas veces guiones o barras bajas que quizás convendría quitar.
+- Hay que mejorar BuscaImgType (ya estoy en ello) para acotar las posibilidades que se muestran en la base de datos.
+- BuscaCosasEnCadena sigue fallando.
