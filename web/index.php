@@ -164,7 +164,7 @@ function cambiar(){
 	?>
 	<datalist id="listatipos">
 	<?php
-	$arraytipos = array('Flat', 'Domme','Bias', 'Dark','Science');
+	$arraytipos = array('Flat', 'Dome','Bias', 'Dark','Science');
 	natsort($arraytipos);
 	foreach($arraytipos as $i){
 	  echo "<option value='".$i."'>".$i."</option>";

@@ -1,0 +1,6 @@
+# TODO
+
+- La función BuscaTyF funciona mal porque modifica el array par en lugar de devolverlo. Hay que solucionar eso. Hay que asegurarse de que solo recurre a FechaDelNombre cuando no ha encontrado la fecha entre los campos.
+- BuscaCosasEnCadena no funciona correctamente
+- BuscaObject2 no funciona correctamente
+- Hay que mejorar la obtención del tipo de imagen

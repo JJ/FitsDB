@@ -3,6 +3,9 @@
 # Extracción de campos de archivos fits
 import os, pyfits, sys
 from os import listdir, walk
+from datetime import datetime
+
+print "Inicio: " + str(datetime.utcnow())
 
 # HAY QUE IMPLEMENTAR UN LOG
 #import logging
@@ -165,6 +168,20 @@ def FormatoFecha(cadena):
       #break
   #return 0
 
+
+def BuscaCosasEnCadena(cadena,arraycosas):
+  contador = 0
+  for j in arraycosas:
+    if cadena.find(j):
+      contador += 1
+    else:
+      contador -= 1
+  if contador < len(arraycosas):
+    return 1
+  else:
+    return 0
+  
+
 def TiempoExp(cabecera,listaCampos):
   #CamposExp= ['EXPOSURE','EXPTIME']
   if "EXPOSURE" in listaCampos:
@@ -277,7 +294,7 @@ def BuscarTelescopio(cabecera,listaCampos):
 
 
 
-def BuscaObservatorio2(cabecera,listaCampos): # Esta incluye coordenadas para los archivos sin observatorio WIP
+def BuscaObservatorio2(cabecera,listaCampos): # Esta incluye coordenadas para los archivos sin observatorio WIP. En desuso
   CamposObservatorio = ['OBSERVAT','ORIGIN']
   salida = 'UNK'
   for i in CamposObservatorio:
@@ -336,44 +353,43 @@ def BuscaObject(cabecera,listaCampos): # En desuso en favor de la mejorada Busca
   #print ruta
   #print listaCampos
   return ruta.split('/')[-1].replace(" ", "")
-  
+
+
+
 def BuscaObject2(cabecera,listaCampos):
   CamposObject = ['OBJECT','OBJCAT','SIMPLE']
-  evitamos = ['','flat','bias','domme']
+  lista1 = ['flat','dome']
+  lista2 = ['bias','dark']
   import re
   for i in CamposObject:
     if i in (s.rstrip(' ') for s in listaCampos):
-      #print "ni sabemos si es SIMPLE o no"
       if i != 'SIMPLE':
-	#print "No es SIMPLE"
-	if cabecera[i].strip(' ').lower() not in evitamos:
-	  #print ruta
-	  return cabecera[i].upper()
-	  break
-      elif re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1]):
-	#print "Es SIMPLE y hay positivo en patrón"
-	posiblenombre = re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1]).group(0).replace(" ", "").upper()
+	if BuscaCosasEnCadena(cabecera[i].lower(),lista1):
+	  ImgType = "Flat/Dome"
+	  return "UNK"
+	elif BuscaCosasEnCadena(cabecera[i].lower(),lista2):
+	  ImgType = "Dark/Bias"
+	  return "UNK"
+	else:
+	  ImgType = "Object"
+	  return cabecera[i].upper().replace(" ", "")
+	
+	#if cabecera[i].strip(' ').lower() not in evitamos:
+	  ##print ruta
+	  #return cabecera[i].upper().replace(" ", "")
+	  #break
+      elif re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1].replace("-","")):
+	posiblenombre = re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1].replace("-","")).group(0).replace(" ", "").upper()
 	return posiblenombre
       else:
-	#print "Es SIMPLE pero no hay positivo en patrón"
 	posiblenombre = ruta.split('/')[-1].replace(" ", "")
 	return posiblenombre
-  #print ruta
-  #print listaCampos
-  
-  #posiblenombre = re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1]).group(0).replace(" ", "") + "--KK"
-  #if len(posiblenombre) > 5:
-    #otro = posiblenombre
-  #else:
-    #otro = ruta.split('/')[-1].replace(" ", "")
-  
-  #return otro
 
 
 def ClassifyImgType(tipo, ruta):
   partes = tipo.lower().split(' ')
   carpetas = ruta.lower()
-  listaCal = ['bias','flat','dark','domme']
+  listaCal = ['bias','flat','dark','dome']
   for i in listaCal:# and carpetas:
     if i in partes:
       return 0
@@ -396,6 +412,18 @@ def BuscaImgType(cabecera,listaCampos):
   return 'UNK'
 
 
+ 
+
+def BuscaImgType2(cabecera,listaCampos):
+  CamposImgType = ['IMAGETYP','SIMPLE']
+  for i in CamposImgType:
+    if i in (s.rstrip(' ') for s in listaCampos):
+      if cabecera[i] != '':
+	return cabecera[i]
+	break
+  #print ruta
+  #print listaCampos
+  return 'UNK'
 
 
 
@@ -488,13 +516,9 @@ def GetData(url):
     try:
       #print "par, instr y telescopio"
       fuente = pyfits.open(url)
-      
       listaCampos = fuente[0].header.keys()
-      
       cabecera = fuente[0].header
-      
       par = BuscaFyT(cabecera, listaCampos)
-      
       Instr = BuscaInstr(cabecera,listaCampos)
       Telescopio = BuscarTelescopio(cabecera,listaCampos)
       
@@ -511,11 +535,23 @@ def GetData(url):
 	Observatorio = 'IAC'
       else:
 	Observatorio = BuscaObservatorio(cabecera,listaCampos)
-      ImgType = 'UNK'
-      ImgType = BuscaImgType(cabecera, listaCampos)
       Object = 'UNK'
-      #print "buscando el objeto"
-      Object = BuscaObject2(cabecera,listaCampos)
+      ImgType = 'UNK'
+      Object = BuscaObject(cabecera,listaCampos)
+      ext = ['fit','fits','fts']
+      ImgTypeContador = 0
+      if ImgType == "UNK":
+	if BuscaCosasEnCadena(Object,ext):
+	  ImgType = "Object --KK"
+	#for j in ext:
+	  #if Object.lower().find(j) > 0:
+	    #ImgTypeContador += 1
+	  #else:
+	    #ImgTypeContador -= 1
+	#if ImgTypeContador == -3:
+	  #ImgType = "Object --KK"
+	if ImgType == "UNK":
+	  ImgType = BuscaImgType(cabecera, listaCampos)
       
       
       #if ClassifyImgType(ImgType, ruta) == 1:
@@ -526,7 +562,7 @@ def GetData(url):
       Filter = BuscaFilter(cabecera, listaCampos)
 
       try:
-	from datetime import datetime
+	
 	cur.execute("""INSERT INTO tablaobs VALUES ('NULL',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(datetime.utcnow(),suma,ImgType,Object,par[0],par[1],par[2],Observatorio,Telescopio,Instr,Filter,os.path.abspath(url)))
 	db.commit()
       except:
@@ -568,5 +604,6 @@ for (path, ficheros, archivos) in walk (directorio_imagenes):
 #Sort(archivo_nombres_campos)
 msgfin = "Se han procesado " + str(j) + " archivos.", "green"
 from termcolor import colored
+print "Fin: " + str(datetime.utcnow())
 print colored (msgfin, "green")
 
