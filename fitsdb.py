@@ -323,7 +323,7 @@ def BuscaObservatorio(cabecera,listaCampos):
   return salida
 
 
-def BuscaObject(cabecera,listaCampos):
+def BuscaObject(cabecera,listaCampos): # En desuso en favor de la mejorada BuscaObject2
   CamposObject = ['OBJECT','OBJCAT']
   evitamos = ['','flat','bias','domme']
   import re
@@ -338,29 +338,36 @@ def BuscaObject(cabecera,listaCampos):
   return ruta.split('/')[-1].replace(" ", "")
   
 def BuscaObject2(cabecera,listaCampos):
-  CamposObject = ['OBJECT','OBJCAT']
+  CamposObject = ['OBJECT','OBJCAT','SIMPLE']
   evitamos = ['','flat','bias','domme']
   import re
   for i in CamposObject:
     if i in (s.rstrip(' ') for s in listaCampos):
-      if cabecera[i].strip(' ').lower() not in evitamos:
-	#print ruta
-	posiblenombre = re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}', cabecera[i]).group(0).replace(" ", "")
-	if len(posiblenombre) != 0:
-	  return posiblenombre
-	else:
-	  return cabecera[i]
-	break
+      #print "ni sabemos si es SIMPLE o no"
+      if i != 'SIMPLE':
+	#print "No es SIMPLE"
+	if cabecera[i].strip(' ').lower() not in evitamos:
+	  #print ruta
+	  return cabecera[i].upper()
+	  break
+      elif re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1]):
+	#print "Es SIMPLE y hay positivo en patrón"
+	posiblenombre = re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1]).group(0).replace(" ", "").upper()
+	return posiblenombre
+      else:
+	#print "Es SIMPLE pero no hay positivo en patrón"
+	posiblenombre = ruta.split('/')[-1].replace(" ", "")
+	return posiblenombre
   #print ruta
   #print listaCampos
   
-  posiblenombre = re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1]).group(0).replace(" ", "") + "--KK"
-  if len(posiblenombre) > 5:
-    otro = posiblenombre
-  else:
-    otro = ruta.split('/')[-1].replace(" ", "")
+  #posiblenombre = re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1]).group(0).replace(" ", "") + "--KK"
+  #if len(posiblenombre) > 5:
+    #otro = posiblenombre
+  #else:
+    #otro = ruta.split('/')[-1].replace(" ", "")
   
-  return otro
+  #return otro
 
 
 def ClassifyImgType(tipo, ruta):
@@ -507,7 +514,8 @@ def GetData(url):
       ImgType = 'UNK'
       ImgType = BuscaImgType(cabecera, listaCampos)
       Object = 'UNK'
-      Object = BuscaObject(cabecera,listaCampos)
+      #print "buscando el objeto"
+      Object = BuscaObject2(cabecera,listaCampos)
       
       
       #if ClassifyImgType(ImgType, ruta) == 1:
