@@ -4,6 +4,12 @@
 import os, pyfits, sys
 from os import listdir, walk
 
+# HAY QUE IMPLEMENTAR UN LOG
+#import logging
+#LOG_FILENAME = 'fitsdb.log'
+#logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO)
+#https://docs.python.org/2.6/library/logging.html
+
 
 def ErrorSQL():
   from termcolor import colored
@@ -75,7 +81,7 @@ def CheckConfFileExistence():
     sys.exit()
 
 
-def AddCampos(url, salida):
+def AddCampos(url, salida): # En desuso
   listaDatos = pyfits.open(url)
   listaCamposNuevos = listaDatos[0].header.keys()
   if CheckFileExistence(salida):
@@ -93,7 +99,7 @@ def AddCampos(url, salida):
   listaDatos.close()
 
 
-def Sort(archivo):
+def Sort(archivo): # En desuso
   f = open(archivo, 'r')
   mano = f.readlines()
   mano.sort()
@@ -117,7 +123,7 @@ def HashFile(ruta):
 
 
 
-def JD2Date(entrada):
+def JD2Date(entrada): # En desuso
   from astropy.time import Time
   dato = float(entrada)
   dia = int(dato)
@@ -129,7 +135,7 @@ def JD2Date(entrada):
   return par
 
 
-def MJD2Date(entrada):
+def MJD2Date(entrada): # En desuso
   from astropy.time import Time
   dato = float(entrada)
   dia = int(dato)
@@ -149,13 +155,15 @@ def FormatoFecha(cadena):
     par = [cadena.replace('/','-'),'']
   return par
  
-def EstCom(comentario,buscamos):
-  palabras = comentario.split(' ')
-  for i in palabras:
-    if i == buscamos:
-      return 1
-      break
-  return 0
+
+# NO SE HA LLEGADO A USAR
+#def EstCom(comentario,buscamos):
+  #palabras = comentario.split(' ')
+  #for i in palabras:
+    #if i == buscamos:
+      #return 1
+      #break
+  #return 0
 
 def TiempoExp(cabecera,listaCampos):
   #CamposExp= ['EXPOSURE','EXPTIME']
@@ -172,7 +180,7 @@ def BuscaHora(cabecera, listaCampos):
   for i in CamposHora:
     if i in (s.rstrip(' ') for s in listaCampos):
       if cabecera[i] != '':
-	return cabecera[i]
+	return cabecera[i].rstrip(' ')
 	break
   #print ruta
   #print listaCampos
@@ -210,19 +218,36 @@ def TratamientoFecha(nomcampo,valcampo,comcampo):
     par.extend([''])
   return par
 
-
+def FechaDelNombre(par):
+  import re
+  rutaseg = ruta.split('/')
+  for i in rutaseg:
+    if re.search('[0-9]{8}',i):
+      fecharuta = re.search('[0-9]{8}',i).group(0)
+      par[0] = fecharuta[0:4] + "-" + fecharuta[4:6] + "-" + fecharuta[6:8]
+      break
+    elif re.search('[0-9]{6}',i):
+      fecharuta = re.search('[0-9]{6}',i).group(0)
+      par[0] = "20" + fecharuta[0:2] + "-" + fecharuta[2:4] + "-" + fecharuta[4:6]
+      break
+  return par
 
 
 
 def BuscaFyT(cabecera,listaCampos):
-  CamposFecha = ['DATE-OBS','DATE-AVG','JD','JUL-DATE','JUL_DATE','JD-HELIO','JD_HELIO','DATE_OBS','DATE','SID-TIME','SID_TIME','MJD','MJD-OBS','MNT_INFO','OPENTIME','READTIME','ST','STSTART','TIME''TIME-END','TIME_END','TM_START','TM-START','UNI-TIME','UNI_TIME','USEC','UT','UTC','UT_END','UT-END','UTOBS','UT_START','CLOSTIME','CTIME','DARKTIME','ELAPSED','EXPOSED','EXP_ID','EXPSTART','LST']
+  CamposFecha = ['DATE-OBS','DATE-AVG','JD','JUL-DATE','JUL_DATE','JD-HELIO','JD_HELIO','DATE_OBS','DATE','SID-TIME','SID_TIME','MJD','MJD-OBS','MNT_INFO','OPENTIME','READTIME','ST','STSTART','TIME''TIME-END','TIME_END','TM_START','TM-START','UNI-TIME','UNI_TIME','USEC','UT','UTC','UT_END','UT-END','UTOBS','UT_START','CLOSTIME','CTIME','DARKTIME','ELAPSED','EXPOSED','EXP_ID','EXPSTART','LST','SIMPLE']
+  par = ['0','0','0']
   for i in CamposFecha:
     if i in (s.rstrip(' ') for s in listaCampos):
-      par = TratamientoFecha(i,cabecera[i],cabecera.comments[i]) # par es una lista de 3 componentes
-      if par[1] == '':
-	par[1] = BuscaHora(cabecera,listaCampos)
-      par[2] = TiempoExp(cabecera, listaCampos)
-      break
+      if i != "SIMPLE":
+	par = TratamientoFecha(i,cabecera[i].rstrip(' '),cabecera.comments[i]) # par es una lista de 3 componentes
+	if par[1] == '0':
+	  par[1] = BuscaHora(cabecera,listaCampos)
+	par[2] = TiempoExp(cabecera, listaCampos)
+	break
+      else:
+	break
+  par = FechaDelNombre(par)
   return par
 
 
@@ -385,7 +410,7 @@ def CrearTablaObs():
   cur.execute("""CREATE TABLE IF NOT EXISTS tablaobs
   (id BIGINT NOT NULL UNIQUE AUTO_INCREMENT,
   moddate TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  md5sum CHAR(32) NOT NULL,
+  md5sum CHAR(32),
   imgtype VARCHAR(20),
   object VARCHAR(30),
   dateobs DATE,
@@ -448,15 +473,21 @@ def CheckDB2(ruta): # más que suma debe recibir la ruta del archivo como argume
 
 
 def GetData(url):
-  suma = HashFile(url)
+  #suma = HashFile(url)
+  suma =''
   if CheckDB2(url):
     pass
   else:
     try:
+      #print "par, instr y telescopio"
       fuente = pyfits.open(url)
+      
       listaCampos = fuente[0].header.keys()
+      
       cabecera = fuente[0].header
+      
       par = BuscaFyT(cabecera, listaCampos)
+      
       Instr = BuscaInstr(cabecera,listaCampos)
       Telescopio = BuscarTelescopio(cabecera,listaCampos)
       
@@ -474,8 +505,10 @@ def GetData(url):
       else:
 	Observatorio = BuscaObservatorio(cabecera,listaCampos)
       ImgType = 'UNK'
-      Object = 'UNK'
       ImgType = BuscaImgType(cabecera, listaCampos)
+      Object = 'UNK'
+      Object = BuscaObject(cabecera,listaCampos)
+      
       
       #if ClassifyImgType(ImgType, ruta) == 1:
 	#Object = BuscaObject(cabecera,listaCampos)
