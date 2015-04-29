@@ -172,15 +172,15 @@ def FormatoFecha(cadena):
 def BuscaCosasEnCadena(cadena,arraycosas):
   contador = 0
   for j in arraycosas:
-    if cadena.find(j):
+    if cadena.find(j) > 0:
       contador += 1
     else:
       contador -= 1
-  if contador < len(arraycosas):
-    return 1
-  else:
+  if contador == -len(arraycosas):
     return 0
-  
+  else:
+    return 1
+
 
 def TiempoExp(cabecera,listaCampos):
   #CamposExp= ['EXPOSURE','EXPTIME']
