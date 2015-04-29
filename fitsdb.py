@@ -172,14 +172,14 @@ def FormatoFecha(cadena):
 def BuscaCosasEnCadena(cadena,arraycosas):
   contador = 0
   for j in arraycosas:
-    if cadena.find(j) > 0:
-      contador += 1
-    else:
+    if cadena.find(j) >= 0:
       contador -= 1
-  if contador == -len(arraycosas):
-    return 0
-  else:
+    else:
+      contador += 1
+  if contador != len(arraycosas):
     return 1
+  else:
+    return 0
 
 
 def TiempoExp(cabecera,listaCampos):
@@ -203,7 +203,7 @@ def BuscaHora(cabecera, listaCampos):
   #print listaCampos
   return 'UNK'
 
-def TratamientoFecha(nomcampo,valcampo,comcampo):
+def TratamientoFecha(nomcampo,valcampo,comcampo): # Recibe los comentarios como argumento porque a veces hay info útil
   if nomcampo == "DATE-OBS":
     par = FormatoFecha(valcampo)
     par.extend([''])
@@ -359,7 +359,7 @@ def BuscaObject(cabecera,listaCampos): # En desuso en favor de la mejorada Busca
 def BuscaObject2(cabecera,listaCampos):
   CamposObject = ['OBJECT','OBJCAT','SIMPLE']
   lista1 = ['flat','dome']
-  lista2 = ['bias','dark']
+  lista2 = ['dark','bias']
   import re
   for i in CamposObject:
     if i in (s.rstrip(' ') for s in listaCampos):
@@ -396,17 +396,24 @@ def ClassifyImgType(tipo, ruta):
     elif i in carpetas:
       return 0
   return 1
-  
-  
+
+
 
 # Hay que unificar los tipos de imágenes
 def BuscaImgType(cabecera,listaCampos):
   CamposImgType = ['IMAGETYP']
+  lista1 = ['flat','dome']
+  lista2 = ['dark','bias']
   for i in CamposImgType:
     if i in (s.rstrip(' ') for s in listaCampos):
       if cabecera[i] != '':
-	return cabecera[i]
-	break
+        if BuscaCosasEnCadena(cabecera[i].lower(),lista1):
+          return "Flat/Dome"
+        elif BuscaCosasEnCadena(cabecera[i].lower(),lista2):
+          return "Dark/Bias"
+        else:
+          return cabecera[i]
+	#break
   #print ruta
   #print listaCampos
   return 'UNK'
@@ -537,7 +544,7 @@ def GetData(url):
 	Observatorio = BuscaObservatorio(cabecera,listaCampos)
       Object = 'UNK'
       ImgType = 'UNK'
-      Object = BuscaObject(cabecera,listaCampos)
+      Object = BuscaObject2(cabecera,listaCampos)
       ext = ['fit','fits','fts']
       ImgTypeContador = 0
       if ImgType == "UNK":
