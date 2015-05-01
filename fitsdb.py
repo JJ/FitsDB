@@ -481,50 +481,7 @@ def GetData(url):
 	Observatorio = 'IAC'
       else:
 	Observatorio = BuscaObservatorio(cabecera,listaCampos)
-      #Object = 'UNK'
-      #ImgType = 'UNK'
-      
       Object,ImgType = BuscaObjYType(cabecera,listaCampos)
-      #print "aquí tenemos nuestro array de 2: " + ObjYType
-      #Object = ObjYType[0]
-      #ImgType = ObjYType[1]
-      #-----------------------------------------------------------------------------------------------
-      #Object = 'UNK'
-      #ImgType = 'UNK'
-      #Object = BuscaObject2(cabecera,listaCampos)
-      
-      #lista1 = ['dome','flat']
-      #lista2 = ['dark','bias','zero']
-      #lista3 = ['sciencie','light','object']
-      ##if BuscaCosasEnCadena(Object,lista1):
-        ##ImgType = 'Flat/Dome --QQ'
-        ##Object = 'UNK'
-      ##elif BuscaCosasEnCadena(Object,lista2):
-        ##ImgType = 'Dark/Bias --QQ'
-        ##Object = 'UNK'
-      ##elif BuscaCosasEnCadena(Object,lista3):
-        ##ImgType = 'Science --QQ'
-      ##else:
-        ##ImgType = 'UNK'
-      
-      #if BuscaCosasEnCadena(Object,lista1) or BuscaCosasEnCadena(ruta.split('/')[-1],lista1):
-        #ImgType = 'Flat/Dome --QQ'
-        #Object = 'UNK'
-      #elif BuscaCosasEnCadena(Object,lista2) or BuscaCosasEnCadena(ruta.split('/')[-1],lista2):
-        #ImgType = 'Dark/Bias --QQ'
-        #Object = 'UNK'
-      #elif BuscaCosasEnCadena(Object,lista3) or BuscaCosasEnCadena(ruta.split('/')[-1],lista3):
-        #ImgType = 'Science --QQ'
-      #else:
-        #ImgType = 'UNK'
-        
-      #ext = ['fit','fits','fts']
-      #if ImgType == "UNK":
-	#if BuscaCosasEnCadena(Object,ext):
-	  #ImgType = "Object --KK"
-	#if ImgType == "UNK":
-	  #ImgType = BuscaImgType(cabecera, listaCampos)
-      #-----------------------------------------------------------------------------------------------  
       Filter = BuscaFilter(cabecera, listaCampos)
 
       try:
