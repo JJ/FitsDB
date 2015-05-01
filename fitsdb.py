@@ -172,8 +172,8 @@ def TiempoExp(cabecera,listaCampos):
     return str(cabecera['EXPOSURE']).lstrip(' ')
   elif "EXPTIME" in listaCampos:
     return str(cabecera['EXPTIME']).lstrip(' ')
-  else:
-    print "No se encuentra el tiempo de exposición."
+  #else:
+    #print "No se encuentra el tiempo de exposición."
     
     
 def BuscaHora(cabecera, listaCampos):
