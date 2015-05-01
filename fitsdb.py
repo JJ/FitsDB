@@ -176,24 +176,6 @@ def BuscaCosasEnCadena(cadena,arraycosas):
   return 0
 
 
-def BuscaCosasEnCadena_(cadena,arraycosas):
-  contador = 0
-  print "Tenemos que buscar en " + cadena
-  print arraycosas
-  for j in arraycosas:
-    print cadena.lower().find(j)
-    if cadena.find(j) >= 0:
-      contador -= 1
-    else:
-      contador += 1
-  if contador != len(arraycosas):
-    print "está"
-    return 1
-  else:
-    print "no está"
-    return 0
-
-
 def TiempoExp(cabecera,listaCampos):
   #CamposExp= ['EXPOSURE','EXPTIME']
   if "EXPOSURE" in listaCampos:
@@ -352,85 +334,6 @@ def BuscaObservatorio(cabecera,listaCampos):
   return salida
 
 
-def BuscaObject(cabecera,listaCampos): # En desuso en favor de la mejorada BuscaObject2
-  CamposObject = ['OBJECT','OBJCAT']
-  evitamos = ['','flat','bias','domme']
-  import re
-  for i in CamposObject:
-    if i in (s.rstrip(' ') for s in listaCampos):
-      if cabecera[i].strip(' ').lower() not in evitamos:
-	#print ruta
-	return cabecera[i]
-	break
-  #print ruta
-  #print listaCampos
-  return ruta.split('/')[-1].replace(" ", "")
-
-
-
-def BuscaObject2(cabecera,listaCampos):
-  CamposObject = ['OBJECT','OBJCAT','SIMPLE']
-  lista1 = ['flat','dome']
-  lista2 = ['dark','bias']
-  import re
-  for i in CamposObject:
-    if i in (s.rstrip(' ') for s in listaCampos):
-      if i != 'SIMPLE':
-        return cabecera[i].upper().replace(" ", "")
-      elif re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1].replace("-","")):
-	posiblenombre = re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1].replace("-","")).group(0).replace(" ", "").upper()
-	return posiblenombre
-      else:
-	posiblenombre = ruta.split('/')[-1].replace(" ", "")
-	return posiblenombre
-
-
-def ClassifyImgType(tipo, ruta): # En desuso
-  partes = tipo.lower().split(' ')
-  carpetas = ruta.lower()
-  listaCal = ['bias','flat','dark','dome']
-  for i in listaCal:# and carpetas:
-    if i in partes:
-      return 0
-    elif i in carpetas:
-      return 0
-  return 1
-
-
-def BuscaImgType(cabecera,listaCampos):
-  CamposImgType = ['IMAGETYP']
-  lista1 = ['flat','dome']
-  lista2 = ['dark','bias','zero']
-  lista3 = ['light','science','object']
-  for i in CamposImgType:
-    if i in (s.rstrip(' ') for s in listaCampos):
-      if cabecera[i] != '':
-        if BuscaCosasEnCadena(cabecera[i].lower(),lista1):
-          return "Flat/Dome"
-        elif BuscaCosasEnCadena(cabecera[i].lower(),lista2):
-          return "Dark/Bias"
-        elif BuscaCosasEnCadena(cabecera[i].lower(),lista3):
-          return "Science"
-        else:
-          return cabecera[i]
-  return 'UNK'
-
-
- 
-
-def BuscaImgType2(cabecera,listaCampos):
-  CamposImgType = ['IMAGETYP','SIMPLE']
-  for i in CamposImgType:
-    if i in (s.rstrip(' ') for s in listaCampos):
-      if cabecera[i] != '':
-	return cabecera[i]
-	break
-  #print ruta
-  #print listaCampos
-  return 'UNK'
-
-
-
 
 def BuscaObjYType(cabecera,listaCampos):
   CamposObject = ['OBJECT','OBJCAT','SIMPLE']
@@ -449,14 +352,12 @@ def BuscaObjYType(cabecera,listaCampos):
 	AoYt[1] = 'Science'
       else:
 	AoYt[0] = ruta.split('/')[-1].replace(" ", "")
-  # Ahora el tipo
   if AoYt[1] == 'UNK':
     for j in CamposImgType:
       if j in (t.rstrip(' ') for t in listaCampos):
         if i != 'SIMPLE':
           if cabecera[j] != '':
             AoYt[1] = cabecera[j]
-  # Ahora refinamos
   if BuscaCosasEnCadena(AoYt[0],lista1) or BuscaCosasEnCadena(AoYt[1],lista1):
     AoYt[0] = 'None'
     AoYt[1] = 'Flat/Dome'
@@ -468,8 +369,6 @@ def BuscaObjYType(cabecera,listaCampos):
   elif BuscaCosasEnCadena(AoYt[0],lista3) or BuscaCosasEnCadena(AoYt[1],lista3):
     AoYt[1] = 'Science'
     print 'Bingo en lista3, con Objeto: ' + AoYt[0] + ', Imgtype: ' + AoYt[1] + ' y ruta: ' + ruta
-  #else:
-    #print 'Ningún bingo, con Objeto: ' + AoYt[0] + ', Imgtype: ' + AoYt[1] + ' y ruta: ' + ruta
   return AoYt[0],AoYt[1]
   
   
