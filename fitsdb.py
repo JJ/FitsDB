@@ -102,16 +102,6 @@ def AddCampos(url, salida): # En desuso
   listaDatos.close()
 
 
-def Sort(archivo): # En desuso
-  f = open(archivo, 'r')
-  mano = f.readlines()
-  mano.sort()
-  f.close()
-  f = open(archivo, 'w')
-  f.writelines(mano)
-  f.close()
-
-
 
 def HashFile(ruta):
   import hashlib
@@ -171,7 +161,7 @@ def FormatoFecha(cadena):
 
 def BuscaCosasEnCadena(cadena,arraycosas):
   for j in arraycosas:
-    if cadena.lower().find(j) >= 0:
+    if cadena.lower().find(j.lower()) >= 0:
       return 1
   return 0
 
@@ -193,8 +183,6 @@ def BuscaHora(cabecera, listaCampos):
       if cabecera[i] != '':
 	return cabecera[i].rstrip(' ')
 	break
-  #print ruta
-  #print listaCampos
   return 'UNK'
 
 def TratamientoFecha(nomcampo,valcampo,comcampo): # Recibe los comentarios como argumento porque a veces hay info útil
@@ -270,8 +258,6 @@ def BuscaInstr(cabecera,listaCampos): # Algunos archivos no tienen esta informac
       if cabecera[i] != '':
 	return cabecera[i]
 	break
-  #print ruta
-  #prinLight Framet listaCampos
   return 'UNK'
 
 
@@ -282,44 +268,7 @@ def BuscarTelescopio(cabecera,listaCampos):
       if cabecera[i] != '':
 	return cabecera[i]
 	break
-  #print ruta
-  #print listaCampos
   return 'UNK'
-
-
-
-def BuscaObservatorio2(cabecera,listaCampos): # Esta incluye coordenadas para los archivos sin observatorio WIP. En desuso
-  CamposObservatorio = ['OBSERVAT','ORIGIN']
-  salida = 'UNK'
-  for i in CamposObservatorio:
-    if i in (s.rstrip(' ') for s in listaCampos):
-      if cabecera[i] != '':
-	salida = cabecera[i].replace('stron?mico','stronómico')
-	return salida
-	break
-  print "peto1"
-  CamposLong = ['SITELONG','LONGITUD','LONG-OBS']
-  CamposLat = ['SITELAT','LATITUDE','LAT-OBS']
-  for j in CamposLong:
-    if j in (s.rstrip(' ') for s in listaCampos):
-      print "peto2"
-      if cabecera[j] != '':
-	print "peto3"
-	Long = cabecera[j]
-    else:
-      print "no está"
-  print "peto2.1"
-  for k in CamposLat:
-    if k in (s.rstrip(' ') for s in listaCampos):
-      if cabecera[k] != '':
-	Lat = cabecera[k]
-    else:
-      print "tampoco está"
-  if len(str(Long)) > 1:
-    print "hay datos"
-    salida = str(Long) + '; ' + str(Lat)
-  else:
-    return salida
 
 
 def BuscaObservatorio(cabecera,listaCampos):
@@ -337,38 +286,43 @@ def BuscaObservatorio(cabecera,listaCampos):
 
 def BuscaObjYType(cabecera,listaCampos):
   CamposObject = ['OBJECT','OBJCAT','SIMPLE']
-  CamposImgType = ['IMAGETYP','SIMPLE']
+  CamposImgType = ['IMAGETYP','OBS-TYPE','ESO DPR CATG','SIMPLE']
   lista1 = ['flat','dome']
   lista2 = ['dark','bias','zero']
-  lista3 = ['science','light','object']
+  lista3 = ['science','light','object','ACQUISITION']
   AoYt = ['UNK','UNK']
-  import re
-  for i in CamposObject:
-    if i in (s.rstrip(' ') for s in listaCampos):
-      if i != 'SIMPLE':
-        AoYt[0] = cabecera[i].upper().replace(" ", "")
-      elif re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1].replace("-","")):
-	AoYt[0] = re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1].replace("-","")).group(0).replace(" ", "").upper()
-	AoYt[1] = 'Science'
-      else:
-	AoYt[0] = ruta.split('/')[-1].replace(" ", "")
   if AoYt[1] == 'UNK':
     for j in CamposImgType:
       if j in (t.rstrip(' ') for t in listaCampos):
-        if i != 'SIMPLE':
+        if j != 'SIMPLE':
           if cabecera[j] != '':
             AoYt[1] = cabecera[j]
+            break
+  import re
+  for i in CamposObject:
+    if i in (s.rstrip(' ') for s in listaCampos):
+      if cabecera[i] != '':
+        if i != 'SIMPLE':
+          AoYt[0] = cabecera[i].upper().replace(" ", "")
+          if re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',AoYt[0]):
+            AoYt[1] = 'Science'
+          break
+        elif re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1].replace("-","")):
+          AoYt[0] = re.search('\d{4}[ A-Za-z]{2,3}\d{1,3}',ruta.split('/')[-1].replace("-","")).group(0).replace(" ", "").upper()
+          AoYt[1] = 'Science'
+          break
+        else:
+          AoYt[0] = ruta.split('/')[-1].replace(" ", "")
+          break
+  # Afinando
   if BuscaCosasEnCadena(AoYt[0],lista1) or BuscaCosasEnCadena(AoYt[1],lista1):
     AoYt[0] = 'None'
     AoYt[1] = 'Flat/Dome'
-    print 'Bingo en lista1, con Objeto: ' + AoYt[0] + ', Imgtype: ' + AoYt[1] + ' y ruta: ' + ruta
   elif BuscaCosasEnCadena(AoYt[0],lista2) or BuscaCosasEnCadena(AoYt[1],lista2):
     AoYt[0] = 'None'
     AoYt[1] = 'Dark/Bias'
-    print 'Bingo en lista2, con Objeto: ' + AoYt[0] + ', Imgtype: ' + AoYt[1] + ' y ruta: ' + ruta
   elif BuscaCosasEnCadena(AoYt[0],lista3) or BuscaCosasEnCadena(AoYt[1],lista3):
     AoYt[1] = 'Science'
-    print 'Bingo en lista3, con Objeto: ' + AoYt[0] + ', Imgtype: ' + AoYt[1] + ' y ruta: ' + ruta
   return AoYt[0],AoYt[1]
   
   
@@ -524,7 +478,6 @@ for (path, ficheros, archivos) in walk (directorio_imagenes):
       j += 1
 
 
-#Sort(archivo_nombres_campos)
 msgfin = "Se han procesado " + str(j) + " archivos.", "green"
 from termcolor import colored
 print "Fin: " + str(datetime.utcnow())
