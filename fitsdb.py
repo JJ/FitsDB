@@ -128,6 +128,19 @@ def JD2Date(entrada): # En desuso
   return par
 
 
+def JD2Date2(entrada): # En desuso
+  from astropy.time import Time
+  arrayFechaJbruta = ['0','0']
+  dato = float(entrada)
+  dia = int(dato)
+  inst = dato - dia
+  t = Time(dia, inst, format='jd')
+  t_rota = t.iso.split(' ')
+  arrayFechaJbruta[0] = t_rota[0].replace('/','-')
+  arrayFechaJbruta[1] = t_rota[1].replace('-',':')
+  return arrayFechaJbruta[0],arrayFechaJbruta[1]
+
+
 def MJD2Date(entrada): # En desuso
   from astropy.time import Time
   dato = float(entrada)
@@ -139,6 +152,19 @@ def MJD2Date(entrada): # En desuso
   par[1] = t.iso.split(' ')[1].replace('-',':')
   return par
 
+
+def MJD2Date2(entrada): # En desuso
+  from astropy.time import Time
+  dato = float(entrada)
+  dia = int(dato)
+  inst = dato - dia
+  t = Time(dia, inst, format='mjd')
+  par = t.iso.split(' ')
+  par[0] = t.iso.split(' ')[0].replace('/','-')
+  par[1] = t.iso.split(' ')[1].replace('-',':')
+  return par
+
+
 def FormatoFecha(cadena):
   if 'T' in cadena:
     par = cadena.split("T")
@@ -148,6 +174,22 @@ def FormatoFecha(cadena):
     par = [cadena.replace('/','-'),'']
   return par
  
+
+def FormatoFecha2(fechabruta):
+  if 'T' in fechabruta:
+    arrayFechabruta = fechabruta.split("T")
+    arrayFechabruta[0] = arrayFechabruta[0].replace('/','-')
+    arrayFechabruta[1] = arrayFechabruta[1].replace('-',':')
+  else:
+    arrayFechabruta = ['0','0']
+    if '/' in fechabruta:
+      arrayFechabruta[0] = fechabruta.replace('/','-')
+      arrayFechabruta[1] = '0'
+    else:
+      arrayFechabruta[0] = fechabruta
+      arrayFechabruta[1] = '0'
+  return arrayFechabruta[0],arrayFechabruta[1]
+
 
 # NO SE HA LLEGADO A USAR
 #def EstCom(comentario,buscamos):
@@ -185,6 +227,17 @@ def BuscaHora(cabecera, listaCampos):
 	break
   return 'UNK'
 
+
+def BuscaHora2(cabecera, listaCampos):
+  CamposHora=['TIME-OBS','TIME_OBS','UTSTART','UT','EXPSTART','TIME-INI']
+  for i in CamposHora:
+    if i in (s.rstrip(' ') for s in listaCampos):
+      if cabecera[i] != '':
+	return cabecera[i].rstrip(' ')
+	break
+  return 'UNK'
+
+
 def TratamientoFecha(nomcampo,valcampo,comcampo): # Recibe los comentarios como argumento porque a veces hay info útil
   if nomcampo == "DATE-OBS":
     par = FormatoFecha(valcampo)
@@ -217,7 +270,36 @@ def TratamientoFecha(nomcampo,valcampo,comcampo): # Recibe los comentarios como 
     par.extend([''])
   return par
 
+
+def TratamientoFecha2(nomcampo,valcampo):
+  arrayFecha = ['0','0']
+  tipofecha1 = ["DATE-OBS","DATE_OBS","DATE-AVG","DATE"]
+  tipofecha2 = ["JD","JUL-DATE","JUL_DATE"]
+  if nomcampo in (i for i in tipofecha1):
+    arrayFecha[0],arrayFecha[1] = FormatoFecha2(valcampo)
+  elif nomcampo in (j for j in tipofecha2):
+    arrayFecha[0],arrayFecha[1] = JD2Date2(str(valcampo))
+  else:
+    print "No se encuentra " +'\"'+ nomcampo +'\"'+ '\t\t' + ruta # Esta linea iría en un hipotético log
+  return arrayFecha[0],arrayFecha[1]
+
+
 def FechaDelNombre(par):
+  import re
+  rutaseg = ruta.split('/')
+  for i in rutaseg:
+    if re.search('[0-9]{8}',i):
+      fecharuta = re.search('[0-9]{8}',i).group(0)
+      par[0] = fecharuta[0:4] + "-" + fecharuta[4:6] + "-" + fecharuta[6:8]
+      break
+    elif re.search('[0-9]{6}',i):
+      fecharuta = re.search('[0-9]{6}',i).group(0)
+      par[0] = "20" + fecharuta[0:2] + "-" + fecharuta[2:4] + "-" + fecharuta[4:6]
+      break
+  return par
+
+
+def FechaDelNombre2(par):
   import re
   rutaseg = ruta.split('/')
   for i in rutaseg:
@@ -249,6 +331,26 @@ def BuscaFyT(cabecera,listaCampos):
   par = FechaDelNombre(par)
   return par
 
+
+
+def BuscaFyT2(cabecera,listaCampos):
+  CamposFecha = ['DATE-OBS','DATE-AVG','JD','JUL-DATE','JUL_DATE','SIMPLE']
+  trio = ['0','0','0']
+  for i in CamposFecha:
+    if i in (s.rstrip(' ') for s in listaCampos):
+      if i != "SIMPLE":
+        if i !='':
+          trio[0],trio[1] = TratamientoFecha2(i,cabecera[i].rstrip(' '))
+          
+          if trio[1] == '0':
+            trio[1] = BuscaHora2(cabecera,listaCampos)
+            #print "---------------------> Depurando!      ##     "
+          trio[2] = TiempoExp(cabecera, listaCampos)
+          break
+      else:
+	break
+  #trio = FechaDelNombre(trio)
+  return trio[0],trio[1],trio[2]
 
 
 def BuscaInstr(cabecera,listaCampos): # Algunos archivos no tienen esta información
@@ -418,7 +520,9 @@ def GetData(url):
       fuente = pyfits.open(url)
       listaCampos = fuente[0].header.keys()
       cabecera = fuente[0].header
-      par = BuscaFyT(cabecera, listaCampos)
+      #par = BuscaFyT(cabecera, listaCampos)
+      par = ['0','0','0']
+      par[0],par[1],par[2] = BuscaFyT2(cabecera, listaCampos)
       Instr = BuscaInstr(cabecera,listaCampos)
       Telescopio = BuscarTelescopio(cabecera,listaCampos)
       
