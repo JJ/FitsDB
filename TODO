@@ -5,3 +5,4 @@ opción en el archivo de configuración.
 - Muchas veces no se encuentra el tiempo de exposición. No estoy seguro si esto se podrá mejorar o no.
 - BuscaObject2 no funciona correctamente +Podría estar resuelto+
 - En los nombres de objetos según nomenclatura hay muchas veces guiones o barras bajas que quizás convendría quitar.
+- Hay problemas al leer la etiqueta UT porque por lo visto no pertenece al estándar FITS. El problema se trata en BuscaHora2, y en parte está solucionado con una expresión regular.

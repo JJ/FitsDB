@@ -229,13 +229,29 @@ def BuscaHora(cabecera, listaCampos):
 
 
 def BuscaHora2(cabecera, listaCampos):
-  CamposHora=['TIME-OBS','TIME_OBS','UTSTART','UT','EXPSTART','TIME-INI']
+  CamposHora=['TIME-OBS','TIME_OBS','UTSTART','UT','EXPSTART','TIME-INI','SIMPLE']
   for i in CamposHora:
     if i in (s.rstrip(' ') for s in listaCampos):
-      if cabecera[i] != '':
-	return cabecera[i].rstrip(' ')
-	break
-  return 'UNK'
+      if i == 'UT': # Esto es una chapuza porque la librería no consigue leer los campos UT
+        print cabecera
+        print "----------------------------------------------------------------------------------------- BIEN"
+        
+        import re
+        if re.search('UT      = \'[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{0,2}',str(cabecera)):
+          horabruta = re.search('UT      = \'[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{0,2}',str(cabecera)).group(0)
+          return re.search('[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{0,2}',horabruta).group(0)
+        elif re.search('UT      = [0-9]{2}',str(cabecera)):
+          
+          #return str(cabecera[i]).rstrip(' ')
+          return '0'
+        else:
+          return '0'
+      elif i != 'SIMPLE':
+        if str(cabecera[i]) != '':
+          return str(cabecera[i]).rstrip(' ')
+          break
+      else:
+        return '0'
 
 
 def TratamientoFecha(nomcampo,valcampo,comcampo): # Recibe los comentarios como argumento porque a veces hay info útil
@@ -341,10 +357,10 @@ def BuscaFyT2(cabecera,listaCampos):
       if i != "SIMPLE":
         if i !='':
           trio[0],trio[1] = TratamientoFecha2(i,cabecera[i].rstrip(' '))
-          
           if trio[1] == '0':
             trio[1] = BuscaHora2(cabecera,listaCampos)
-            #print "---------------------> Depurando!      ##     "
+            print "--------------------------------------------------> Depurando!      ##     " + trio[1]
+            
           trio[2] = TiempoExp(cabecera, listaCampos)
           break
       else:
