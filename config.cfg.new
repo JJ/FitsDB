@@ -3,3 +3,6 @@ user =
 pass = 
 dbname = 
 hostname = 
+
+[general]
+fechaenruta = 0

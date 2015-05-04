@@ -304,13 +304,19 @@ def FechaDelNombre(par):
   for i in rutaseg:
     if re.search('[0-9]{8}',i):
       fecharuta = re.search('[0-9]{8}',i).group(0)
-      par[0] = fecharuta[0:4] + "-" + fecharuta[4:6] + "-" + fecharuta[6:8]
+      if int(fecharuta[0:4]) <= int(datetime.utcnow().strftime('%Y')):
+        fechamontada = fecharuta[0:4] + "-" + fecharuta[4:6] + "-" + fecharuta[6:8]
+      else:
+        fechamontada = '0'
       break
     elif re.search('[0-9]{6}',i):
       fecharuta = re.search('[0-9]{6}',i).group(0)
-      par[0] = "20" + fecharuta[0:2] + "-" + fecharuta[2:4] + "-" + fecharuta[4:6]
+      if ((2000+int(fecharuta[0:2])) <= int(datetime.utcnow().strftime('%Y'))):
+        fechamontada = "20" + fecharuta[0:2] + "-" + fecharuta[2:4] + "-" + fecharuta[4:6]
+      else:
+        fechamontada = '0'
       break
-  return par
+  return fechamontada
 
 
 def FechaDelNombre2(par):
@@ -363,7 +369,8 @@ def BuscaFyT2(cabecera,listaCampos):
           break
       else:
 	break
-  #trio = FechaDelNombre(trio)
+  if (trio[0] == '0') and config.get('general','fechaderuta'):
+    trio = FechaDelNombre(trio)
   return trio[0],trio[1],trio[2]
 
 
@@ -479,8 +486,9 @@ def CrearTablaObs():
 
 def IniciarDB():
   if CheckConfFileExistence():
-    import ConfigParser
     import MySQLdb
+    import ConfigParser
+    global config
     config = ConfigParser.RawConfigParser()
     config.read('config.cfg')
     varUser = config.get('mysql', 'user')
