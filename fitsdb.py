@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf8 -*-
 # Extracción de campos de archivos fits
-import os, pyfits, sys
+import os, sys
 from os import listdir, walk
 from datetime import datetime
 
@@ -233,19 +233,17 @@ def BuscaHora2(cabecera, listaCampos):
   for i in CamposHora:
     if i in (s.rstrip(' ') for s in listaCampos):
       if i == 'UT': # Esto es una chapuza porque la librería no consigue leer los campos UT
-        print cabecera
-        print "----------------------------------------------------------------------------------------- BIEN"
-        
-        import re
-        if re.search('UT      = \'[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{0,2}',str(cabecera)):
-          horabruta = re.search('UT      = \'[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{0,2}',str(cabecera)).group(0)
-          return re.search('[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{0,2}',horabruta).group(0)
-        elif re.search('UT      = [0-9]{2}',str(cabecera)):
-          
-          #return str(cabecera[i]).rstrip(' ')
-          return '0'
-        else:
-          return '0'
+        try:
+          import re
+          if re.search('UT      = \'[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{0,2}',str(cabecera)):
+            horabruta = re.search('UT      = \'[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{0,2}',l).group(0)
+            return re.search('[0-9]{2}\:[0-9]{2}\:[0-9]{2}\.[0-9]{0,2}',horabruta).group(0)
+          else:
+            return '0'
+        except:
+          if str(cabecera[i]) != '':
+            return str(cabecera[i]).rstrip(' ')
+            break
       elif i != 'SIMPLE':
         if str(cabecera[i]) != '':
           return str(cabecera[i]).rstrip(' ')
@@ -359,7 +357,7 @@ def BuscaFyT2(cabecera,listaCampos):
           trio[0],trio[1] = TratamientoFecha2(i,cabecera[i].rstrip(' '))
           if trio[1] == '0':
             trio[1] = BuscaHora2(cabecera,listaCampos)
-            print "--------------------------------------------------> Depurando!      ##     " + trio[1]
+            #print "--------------------------------------------------> Depurando!      ##     " + trio[1]
             
           trio[2] = TiempoExp(cabecera, listaCampos)
           break
@@ -525,52 +523,63 @@ def CheckDB2(ruta): # más que suma debe recibir la ruta del archivo como argume
 #--------------------------
 
 
+def BloquePrincipal(url,suma,fuente):
+    listaCampos = fuente[0].header.keys()
+    cabecera = fuente[0].header    
+    #par = BuscaFyT(cabecera, listaCampos)
+    par = ['0','0','0']
+    par[0],par[1],par[2] = BuscaFyT2(cabecera,listaCampos)
+    Instr = BuscaInstr(cabecera,listaCampos)
+    Telescopio = BuscarTelescopio(cabecera,listaCampos)
+    
+    if 'OSN' in Telescopio:
+      Observatorio = 'OSN'
+      Telescopio = Telescopio.replace('OSN','').strip(' ')
+    elif 'Sierra Nevada Observatory' in Telescopio:
+      Observatorio = 'OSN'
+      Telescopio = Telescopio.replace('Sierra Nevada Observatory','').strip(' ')
+    elif 'ESO' in Telescopio:
+      Observatorio = 'ESO'
+      Telescopio = Telescopio.replace('ESO-','').strip(' ')
+    elif 'IAC' in Telescopio:
+      Observatorio = 'IAC'
+    else:
+      Observatorio = BuscaObservatorio(cabecera,listaCampos)
+    Object,ImgType = BuscaObjYType(cabecera,listaCampos)
+    Filter = BuscaFilter(cabecera, listaCampos)
 
+    try:
+      
+      cur.execute("""INSERT INTO tablaobs VALUES ('NULL',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(datetime.utcnow(),suma,ImgType,Object,par[0],par[1],par[2],Observatorio,Telescopio,Instr,Filter,os.path.abspath(url)))
+      db.commit()
+    except:
+      print "---> No se ha podido introducir los datos del archivo: " + url
+      pass
+
+
+    fuente.close()
+    
 def GetData(url):
   #suma = HashFile(url)
   suma =''
   if CheckDB2(url):
     pass
   else:
+    import pyfits
+    #hdu.verify('silentfix')
     try:
       fuente = pyfits.open(url)
-      listaCampos = fuente[0].header.keys()
-      cabecera = fuente[0].header
-      #par = BuscaFyT(cabecera, listaCampos)
-      par = ['0','0','0']
-      par[0],par[1],par[2] = BuscaFyT2(cabecera, listaCampos)
-      Instr = BuscaInstr(cabecera,listaCampos)
-      Telescopio = BuscarTelescopio(cabecera,listaCampos)
-      
-      if 'OSN' in Telescopio:
-	Observatorio = 'OSN'
-	Telescopio = Telescopio.replace('OSN','').strip(' ')
-      elif 'Sierra Nevada Observatory' in Telescopio:
-	Observatorio = 'OSN'
-	Telescopio = Telescopio.replace('Sierra Nevada Observatory','').strip(' ')
-      elif 'ESO' in Telescopio:
-	Observatorio = 'ESO'
-	Telescopio = Telescopio.replace('ESO-','').strip(' ')
-      elif 'IAC' in Telescopio:
-	Observatorio = 'IAC'
-      else:
-	Observatorio = BuscaObservatorio(cabecera,listaCampos)
-      Object,ImgType = BuscaObjYType(cabecera,listaCampos)
-      Filter = BuscaFilter(cabecera, listaCampos)
-
-      try:
-	
-	cur.execute("""INSERT INTO tablaobs VALUES ('NULL',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(datetime.utcnow(),suma,ImgType,Object,par[0],par[1],par[2],Observatorio,Telescopio,Instr,Filter,os.path.abspath(url)))
-	db.commit()
-      except:
-	print "---> No se ha podido introducir los datos del archivo: " + url
-	pass
-
-
-      fuente.close()
+      BloquePrincipal(url,suma,fuente)
     except:
-      print "---> Error al abrir " + url
-      pass
+      try:
+        fuente.verify('silentfix')
+        fuente = pyfits.open(url)
+        BloquePrincipal(url,suma,fuente)
+      except:
+        print "---> Error al abrir " + url
+        pass
+
+    
 
 
 
