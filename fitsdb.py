@@ -298,7 +298,7 @@ def TratamientoFecha2(nomcampo,valcampo):
   return arrayFecha[0],arrayFecha[1]
 
 
-def FechaDelNombre(par):
+def FechaDelNombre2():
   import re
   rutaseg = ruta.split('/')
   for i in rutaseg:
@@ -319,7 +319,7 @@ def FechaDelNombre(par):
   return fechamontada
 
 
-def FechaDelNombre2(par):
+def FechaDelNombre(par):
   import re
   rutaseg = ruta.split('/')
   for i in rutaseg:
@@ -370,7 +370,7 @@ def BuscaFyT2(cabecera,listaCampos):
       else:
 	break
   if (trio[0] == '0') and config.get('general','fechaderuta'):
-    trio = FechaDelNombre(trio)
+    trio[0] = FechaDelNombre2()
   return trio[0],trio[1],trio[2]
 
 
