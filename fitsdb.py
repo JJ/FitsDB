@@ -17,11 +17,12 @@ print "Inicio: " + str(datetime.utcnow())
 def ErrorSQL():
   from termcolor import colored
   print colored ("¡ERROR!", "red")
-  print "No se ha encontrado la configuración necesaria para el uso de"
-  print "la base de datos MySQL."
+  print "No se ha encontrado o no se ha podido acceder al archivo de configuración"
+  print "necesario para el uso de la base de datos MySQL."
   print " "
-  print "Debe rellenar los campos del archivo \'/etc/fitsdb.d/fitsdb.cfg\' relativos a"
-  print "la base de datos según el ejemplo que se muestra a continuación:"
+  print "Si la carpeta \'/etc/fitsdb.d/\' no existe debe crearla."
+  print "También debe rellenar los campos del archivo \'/etc/fitsdb.d/fitsdb.cfg\'"
+  print "relativos a la base de datos según el ejemplo que se muestra a continuación:"
   print " "
   print "[mysql]"
   print "user = NombreDeUsuario"
@@ -29,6 +30,7 @@ def ErrorSQL():
   print "dbname = NombreDeLaBaseDeDatos"
   print "hostname = DirecciónDelServidor"
   print " "
+  print "Y darle permisos 644 de forma que todos los usuarios puedan leerlo."
   print "Vuelva a intentarlo, por favor."
   print " "
 
