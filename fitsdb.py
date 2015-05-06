@@ -178,7 +178,9 @@ def FormatoFecha(cadena):
 def FormatoFecha2(fechabruta):
   if 'T' in fechabruta:
     arrayFechabruta = fechabruta.split("T")
-    arrayFechabruta[0] = arrayFechabruta[0].replace('/','-')
+    import re
+    #arrayFechabruta[0] = arrayFechabruta[0].replace('/','-')
+    arrayFechabruta[0] = re.search('[0-9]{4}-[0-9]{2}-[0-9]{2}',arrayFechabruta[0].replace('/','-')).group(0)
     arrayFechabruta[1] = arrayFechabruta[1].replace('-',':')
   else:
     arrayFechabruta = ['0','0']
@@ -214,7 +216,8 @@ def TiempoExp(cabecera,listaCampos):
     return str(cabecera['EXPOSURE']).lstrip(' ')
   elif "EXPTIME" in listaCampos:
     return str(cabecera['EXPTIME']).lstrip(' ')
-  #else:
+  else:
+    return '0'
     #print "No se encuentra el tiempo de exposición."
     
     
@@ -369,7 +372,8 @@ def BuscaFyT2(cabecera,listaCampos):
           break
       else:
 	break
-  if (trio[0] == '0') and config.get('general','fechaderuta'):
+  if (trio[0] == '0') and int(config.get('general','fechaderuta')):
+    print "---> Intentando sacar la fecha a partir de la ruta del archivo..."
     trio[0] = FechaDelNombre2()
   return trio[0],trio[1],trio[2]
 
