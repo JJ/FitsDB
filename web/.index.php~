@@ -164,7 +164,7 @@ function cambiar(){
 	?>
 	<datalist id="listatipos">
 	<?php
-	$arraytipos = array('Flat', 'Dome','Bias', 'Dark','Science');
+	$arraytipos = array('Flat', 'Domme','Bias', 'Dark','Science');
 	natsort($arraytipos);
 	foreach($arraytipos as $i){
 	  echo "<option value='".$i."'>".$i."</option>";
@@ -340,16 +340,10 @@ else {
   }
 
   
+  
 
-$config = parse_ini_file("/etc/fitsdb.d/fitsdb.cfg",true);
-$mysql_user = $config['mysql']['user'];
-$mysql_pass = $config['mysql']['pass'];
-$mysql_dbname = $config['mysql']['dbname'];
-$mysql_hostname = $config['mysql']['hostname'];
+$conexion = new mysqli("127.0.0.1", "pablo", "halconmilenario", "pruebasdb");
 
-
-// $conexion = new mysqli("127.0.0.1", "pablo", "halconmilenario", "pruebasdb");
-$conexion = new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
 $resultado = $conexion->query($peticion);
 $resultado -> data_seek(0);
 $archivos = array();

@@ -7,8 +7,6 @@ FitsDB v0.1.1-1
 <body>
 <div id='main'>
 <?php
-set_time_limit(0);
-define('DEBUG', false);
 // session_start();
 //error_reporting(E_ALL);
 //ini_set('display_errors', true);
@@ -164,7 +162,7 @@ function cambiar(){
 	?>
 	<datalist id="listatipos">
 	<?php
-	$arraytipos = array('Flat', 'Dome','Bias', 'Dark','Science');
+	$arraytipos = array('Flat/Domme','Bias/Dark','Science');
 	natsort($arraytipos);
 	foreach($arraytipos as $i){
 	  echo "<option value='".$i."'>".$i."</option>";
@@ -179,20 +177,20 @@ function cambiar(){
 <!--       <input type="number" name="exptime1" id="exptime1" step="10" style="width: 79px;" min="0"/> -->
       	<?php
 	if (strlen($exptime1)>0){
-	echo "<input type='number' name='exptime1' id='exptime1' step='10' style='width: 79px;' min='0' value='".$exptime1."'/>";
+	echo "<input type='number' name='exptime1' id='exptime1' step='10' style='width 79px;' min='0' value='".$exptime1."'/>";
 	}
 	else{
-	echo "<input type='number' name='exptime1' id='exptime1' step='10' style='width: 79px;' min='0' />";
+	echo "<input type='number' name='exptime1' id='exptime1' step='10' style='width 79px;' min='0' />";
 	}
 	?>
       a 
 <!--       <input type="number" name="exptime2" id="exptime2" step="10" style="width: 79px;" min="0" /> -->
       	<?php
 	if (strlen($exptime2)>0){
-	echo "<input type='number' name='exptime2' id='exptime2' step='10' style='width: 79px;' min='0' value='".$exptime2."'/>";
+	echo "<input type='number' name='exptime2' id='exptime2' step='10' style='width 79px;' min='0' value='".$exptime2."'/>";
 	}
 	else{
-	echo "<input type='number' name='exptime2' id='exptime2' step='10' style='width: 79px;' min='0' />";
+	echo "<input type='number' name='exptime2' id='exptime2' step='10' style='width 79px;' min='0' />";
 	}
 	?>
 
@@ -259,8 +257,7 @@ function cambiar(){
     <input type="submit" name="enviar" id="enviar" value="Enviar consulta" />
     </td>
     <td>
-<!--     <input type="reset" id="reset" value="Limpiar formulario" /> -->
-    <input type="button" id="reset2" value="Limpiar formulario" onClick='window.location.reload()' />
+    <input type="reset" id="reset" value="Limpiar formulario" />
     </td>
     <td>
     </td>
@@ -340,16 +337,10 @@ else {
   }
 
   
+  
 
-$config = parse_ini_file("/etc/fitsdb.d/fitsdb.cfg",true);
-$mysql_user = $config['mysql']['user'];
-$mysql_pass = $config['mysql']['pass'];
-$mysql_dbname = $config['mysql']['dbname'];
-$mysql_hostname = $config['mysql']['hostname'];
+$conexion = new mysqli("127.0.0.1", "pablo", "halconmilenario", "pruebasdb");
 
-
-// $conexion = new mysqli("127.0.0.1", "pablo", "halconmilenario", "pruebasdb");
-$conexion = new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
 $resultado = $conexion->query($peticion);
 $resultado -> data_seek(0);
 $archivos = array();
@@ -360,7 +351,7 @@ $archivos = array();
 
 <br>
 <br>
-<table border=0 align=center class='zebra'>
+<table border=0 align=center width=98% class='zebra'>
   <thead>
     <tr align='center'>
 	<th width=1%>
@@ -442,8 +433,8 @@ while ($fila = $resultado->fetch_assoc())
 </div>
 <div id='autor'>
 <p align='center'> 
-<!--Autor: Juan Pablo Navarro Sánchez <br>-->
-<b>FitsDB</b> se publica bajo licencia GPLv2. Código fuente en <A href='https://github.com/helfio/FitsDB'>Github.</A>
+Autor: Juan Pablo Navarro Sánchez <br>
+<b>FitsDB</b> se publica bajo licencia GPLv2. en <A href='https://github.com/helfio/FitsDB'>Github</A>
 </p>
 </div>
 <?php

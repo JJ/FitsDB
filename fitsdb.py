@@ -20,7 +20,7 @@ def ErrorSQL():
   print "No se ha encontrado la configuración necesaria para el uso de"
   print "la base de datos MySQL."
   print " "
-  print "Debe rellenar los campos del archivo \'config.cfg\' relativos a"
+  print "Debe rellenar los campos del archivo \'/etc/fitsdb.d/fitsdb.cfg\' relativos a"
   print "la base de datos según el ejemplo que se muestra a continuación:"
   print " "
   print "[mysql]"
@@ -494,7 +494,7 @@ def IniciarDB():
     import ConfigParser
     global config
     config = ConfigParser.RawConfigParser()
-    config.read('config.cfg')
+    config.read('/etc/fitsdb.d/fitsdb.cfg')
     varUser = config.get('mysql', 'user')
     varPass = config.get('mysql', 'pass')
     varDBName = config.get('mysql', 'dbname')
