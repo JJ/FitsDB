@@ -611,13 +611,22 @@ IniciarDB()
 
 j = 0
 for (path, ficheros, archivos) in walk (directorio_imagenes):
-  for file in archivos:
-    if file.endswith(".fits") or file.endswith(".fit") or file.endswith(".fts"):
-      ruta = path + '/' + file
+  for archivo in archivos:
+    if archivo.endswith(".zip"):
+      import zipfile
+      ruta = path + '/' + archivo
       ruta = ruta.replace('//','/')
-      #AddCampos(ruta, archivo_nombres_campos) # Antigua. Para listar todos los campos existentes
-      GetData(ruta)
+      zipfile.ZipFile(ruta).extractall('.')
       
+
+for (path, ficheros, archivos) in walk (directorio_imagenes):
+  for archivo in archivos:
+    if archivo.endswith(".fits") or archivo.endswith(".fit") or archivo.endswith(".fts"):
+      ruta = path + '/' + archivo
+      ruta = ruta.replace('//','/')
+      #AddCampos(ruta, archivo_nombres_campos) # En desuso. Para listar todos los campos existentes
+      #GetData(ruta)
+      print "---> Tomo más datos, los tiro por el retrete, y ya son " + str(j) + " datos los que he tirado por el retrete!"
       j += 1
 
 
