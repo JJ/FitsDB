@@ -317,8 +317,8 @@ $sufijo = $sufijo . sprintf(" filter like '%%%s%%'",$filtro);
 }
 
 if ((strlen($idnum) != 0) || (strlen($typeimg) != 0) || (strlen($nombre_obj) != 0) || (strlen($fecha_obs1) != 0) || (strlen($fecha_obs2) != 0) ||(strlen($exptime1) != 0) ||(strlen($exptime2) != 0) || (strlen($observatorio) != 0) || (strlen($telescopio) != 0) || (strlen($instrumento) != 0) || (strlen($filtro) != 0)) {
-  $montamos = $prefijo . " WHERE" . $sufijo . " ORDER BY dateobs DESC";
-  $peticion = preg_replace('/and$/', '', $montamos);
+  $montamos = $prefijo . " WHERE" . $sufijo;
+  $peticion = preg_replace('/and$/', '', $montamos) . " ORDER BY dateobs DESC";
 //   echo "<table width='500' align='left'><tr><td>Se muestra la siguiente petición:</td><td> </td></tr>";
 //   echo "<tr><td>Nombre del objeto:</td><td>" . $nombre_obj . "</td></tr>";
 //   echo "<tr><td>Telescopio:</td><td>" . $telescopio . "</td></tr>";
