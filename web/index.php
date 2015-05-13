@@ -467,20 +467,16 @@ function limpieza($path)
     if ((is_dir($path) === true) and ((time()-filemtime($path)) > 86400 ))
     {
         $files = array_diff(scandir($path), array('.', '..'));
-
         foreach ($files as $file)
         {
             limpieza(realpath($path) . '/' . $file);
         }
-
-        return rmdir($path);
+//         return rmdir($path); // Para borrar el propio directorio que recibe como argumento
     }
-
     else if (is_file($path) === true)
     {
         return unlink($path);
     }
-
     return false;
 }
 ?>
