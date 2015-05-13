@@ -616,7 +616,9 @@ for (path, ficheros, archivos) in walk (directorio_imagenes):
       import zipfile
       ruta = path + '/' + archivo
       ruta = ruta.replace('//','/')
-      zipfile.ZipFile(ruta).extractall('.')
+      sitio = path + '/' + archivo.strip('.zip')
+      zipfile.ZipFile(ruta).extractall(sitio)
+      os.remove(ruta)
       
 
 for (path, ficheros, archivos) in walk (directorio_imagenes):
@@ -625,8 +627,7 @@ for (path, ficheros, archivos) in walk (directorio_imagenes):
       ruta = path + '/' + archivo
       ruta = ruta.replace('//','/')
       #AddCampos(ruta, archivo_nombres_campos) # En desuso. Para listar todos los campos existentes
-      #GetData(ruta)
-      print "---> Tomo más datos, los tiro por el retrete, y ya son " + str(j) + " datos los que he tirado por el retrete!"
+      GetData(ruta)
       j += 1
 
 
