@@ -8,10 +8,10 @@ set_time_limit(0);
 
 $files = ($_POST['selector']);
 if (!file_exists('descargas/')){
-  mkdir('descargas/',0777);
-  if(!file_exists(date('d'))){
-    mkdir('descargas/' . date('d') ,0777);
-  }
+  mkdir('descargas/',0777);}
+
+if(!file_exists('descargas/'.date('d'))){
+  mkdir('descargas/' . date('d') ,0777);
 }
 $path = 'descargas/' . date('d') . '/';
 
