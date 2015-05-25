@@ -484,6 +484,15 @@ function limpieza($path)
 function masnombres($nomobj)
 {
 if (strlen($nomobj) > 1){
+  echo "<p>Dato original: ".$nomobj."</p>";
+  if (preg_match('/[0-9]{4}[A-Za-z]{2}[0-9]*/',$nomobj))
+  {
+    preg_match('/^[0-9]{4}/',$nomobj,$cifra);
+    print_r($cifra);
+    $nomobj = preg_replace('/^[0-9]{4}/',$cifra[0].' ',$nomobj);
+  }
+  $nomobj = strtoupper($nomobj);
+  echo "<p>Dato formateado: ".$nomobj."</p>";
   $url = 'http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND=%27' . urlencode($nomobj) . '%27&MAKE_EPHEM=%27YES%27%20%20%20%20&TABLE_TYPE=%27OBSERVER%27&START_TIME=%272000-12-30%27&STOP_TIME=%272000-12-31%27&STEP_SIZE=%272160%20m%27%20%20%20%20&QUANTITIES=%271%27&CSV_FORMAT=%27YES%27&ANG_FORMAT=%27DEG%27';
   $r = file_get_contents($url);
   // sleep(5);
