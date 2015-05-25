@@ -349,7 +349,7 @@ $mysql_dbname = $config['mysql']['dbname'];
 $mysql_hostname = $config['mysql']['hostname'];
 
 
-// $conexion = new mysqli("127.0.0.1", "pablo", "halconmilenario", "pruebasdb");
+
 $conexion = new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
 $resultado = $conexion->query($peticion);
 $resultado -> data_seek(0);
@@ -483,27 +483,26 @@ function limpieza($path)
 
 function masnombres($nomobj)
 {
-if (strlen($nomobj) > 1){
-  echo "<p>Dato original: ".$nomobj."</p>";
-  if (preg_match('/[0-9]{4}[A-Za-z]{2}[0-9]*/',$nomobj))
-  {
-    preg_match('/^[0-9]{4}/',$nomobj,$cifra);
-    print_r($cifra);
-    $nomobj = preg_replace('/^[0-9]{4}/',$cifra[0].' ',$nomobj);
-  }
-  $nomobj = strtoupper($nomobj);
-  echo "<p>Dato formateado: ".$nomobj."</p>";
-  $url = 'http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND=%27' . urlencode($nomobj) . '%27&MAKE_EPHEM=%27YES%27%20%20%20%20&TABLE_TYPE=%27OBSERVER%27&START_TIME=%272000-12-30%27&STOP_TIME=%272000-12-31%27&STEP_SIZE=%272160%20m%27%20%20%20%20&QUANTITIES=%271%27&CSV_FORMAT=%27YES%27&ANG_FORMAT=%27DEG%27';
-  $r = file_get_contents($url);
-  // sleep(5);
-  preg_match("/[0-9]*\s\w*\s\([0-9]{4}\s\w*/",$r,$bingo);
-  // echo $bingo[0];
-  $paso1= explode(' (',$bingo[0]);
-  $array = explode(' ',$paso1[0]);
-  $array[] = $paso1[1];
-  $array[] = str_replace(' ','',$paso1[1]);
-  print_r($array);
-  echo $array[2];
+  if (strlen($nomobj) > 1){
+    $rsql = $conexion->query("SHOW TABLES LIKE nombresdeobjetos");
+    $rsql -> data_seek(0);
+    if ($rsql)
+  
+  
+    if (preg_match('/[0-9]{4}[A-Za-z]{2}[0-9]*/',$nomobj))
+    {
+      preg_match('/^[0-9]{4}/',$nomobj,$cifra);
+      $nomobj = preg_replace('/^[0-9]{4}/',$cifra[0].' ',$nomobj);
+    }
+    $nomobj = strtoupper($nomobj);
+    $url = 'http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND=%27' . urlencode($nomobj) . '%27&MAKE_EPHEM=%27YES%27%20%20%20%20&TABLE_TYPE=%27OBSERVER%27&START_TIME=%272000-12-30%27&STOP_TIME=%272000-12-31%27&STEP_SIZE=%272160%20m%27%20%20%20%20&QUANTITIES=%271%27&CSV_FORMAT=%27YES%27&ANG_FORMAT=%27DEG%27';
+    $r = file_get_contents($url);
+    preg_match("/[0-9]*\s\w*\s\([0-9]{4}\s\w*/",$r,$bingo);
+    $paso1= explode(' (',$bingo[0]);
+    $array = explode(' ',$paso1[0]);
+    $array[] = $paso1[1];
+    $array[] = str_replace(' ','',$paso1[1]); // Aquí ya tiene todos los nombres listos para consultar tablaobs.
+    print_r($array);
 }
 }
 ?>
