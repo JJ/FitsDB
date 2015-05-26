@@ -272,6 +272,7 @@ function cambiar(){
 <br>
 
 <?php
+
 masnombres($nombre_obj);
 
 $prefijo = "SELECT id, object, telescope, instrument, dateobs, timeobs, filter, imgtype, exptime, observatory, rute FROM tablaobs";
@@ -354,6 +355,7 @@ $conexion = new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname)
 $resultado = $conexion->query($peticion);
 $resultado -> data_seek(0);
 $archivos = array();
+tablanombres($conexion);
 ?>
 <form id="form2" name="form2" method="post" action="download.php" align="right">
 <input type="submit" class ="button" name="descargazip" value="Descargar archivos comprimidos" />
@@ -484,9 +486,7 @@ function limpieza($path)
 function masnombres($nomobj)
 {
   if (strlen($nomobj) > 1){
-    $rsql = $conexion->query("SHOW TABLES LIKE nombresdeobjetos");
-    $rsql -> data_seek(0);
-    if ($rsql)
+    
   
   
     if (preg_match('/[0-9]{4}[A-Za-z]{2}[0-9]*/',$nomobj))
@@ -504,6 +504,21 @@ function masnombres($nomobj)
     $array[] = str_replace(' ','',$paso1[1]); // Aquí ya tiene todos los nombres listos para consultar tablaobs.
     print_r($array);
 }
+}
+
+
+function tablanombres($conexion)
+{
+  $rsql = $conexion->query("CREATE TABLE IF NOT EXISTS nombresobjetos (codigo varchar(15) UNIQUE, numerico varchar(15) UNIQUE, nombre varchar(50))");
+}
+
+function consultanombreenbd($nombreconsulta)
+{
+  $rsql -> data_seek(0);
+  if ($rsql){
+  
+  }
+
 }
 ?>
 
