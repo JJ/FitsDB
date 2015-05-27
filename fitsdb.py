@@ -496,7 +496,7 @@ def IniciarDB():
     import ConfigParser
     global config
     config = ConfigParser.RawConfigParser()
-    config.read('/etc/fitsdb.d/fitsdb.cfg')
+    config.read('/usr/local/etc/fitsdb.d/fitsdb.cfg')
     varUser = config.get('mysql', 'user')
     varPass = config.get('mysql', 'pass')
     varDBName = config.get('mysql', 'dbname')
