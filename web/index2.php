@@ -273,7 +273,7 @@ function cambiar(){
 
 <?php
 
-masnombres($nombre_obj);
+
 
 $prefijo = "SELECT id, object, telescope, instrument, dateobs, timeobs, filter, imgtype, exptime, observatory, rute FROM tablaobs";
 $sufijo = '';
@@ -350,12 +350,13 @@ $mysql_dbname = $config['mysql']['dbname'];
 $mysql_hostname = $config['mysql']['hostname'];
 
 
-
+global $conexion;
 $conexion = new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
 $resultado = $conexion->query($peticion);
 $resultado -> data_seek(0);
 $archivos = array();
 tablanombres($conexion);
+masnombres($nombre_obj);
 ?>
 <form id="form2" name="form2" method="post" action="download.php" align="right">
 <input type="submit" class ="button" name="descargazip" value="Descargar archivos comprimidos" />
@@ -486,14 +487,12 @@ function limpieza($path)
 function masnombres($nomobj)
 {
   if (strlen($nomobj) > 1){
-    
-  
-  
-    if (preg_match('/[0-9]{4}[A-Za-z]{2}[0-9]*/',$nomobj))
+    if (preg_match('/[0-9]{4}[A-Za-z]{2}[0-9]*/',$nomobj)) // Esto reescribe el código bien, con el espacio después del año
     {
       preg_match('/^[0-9]{4}/',$nomobj,$cifra);
       $nomobj = preg_replace('/^[0-9]{4}/',$cifra[0].' ',$nomobj);
     }
+    
     $nomobj = strtoupper($nomobj);
     $url = 'http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND=%27' . urlencode($nomobj) . '%27&MAKE_EPHEM=%27YES%27%20%20%20%20&TABLE_TYPE=%27OBSERVER%27&START_TIME=%272000-12-30%27&STOP_TIME=%272000-12-31%27&STEP_SIZE=%272160%20m%27%20%20%20%20&QUANTITIES=%271%27&CSV_FORMAT=%27YES%27&ANG_FORMAT=%27DEG%27';
     $r = file_get_contents($url);
@@ -502,6 +501,19 @@ function masnombres($nomobj)
     $array = explode(' ',$paso1[0]);
     $array[] = $paso1[1];
     $array[] = str_replace(' ','',$paso1[1]); // Aquí ya tiene todos los nombres listos para consultar tablaobs.
+    
+    
+//     Introducimos los datos en la base de datos
+    $codigo = $array[2];
+    $numerico = $array[0];
+    $nombrestd = $array[1];
+    global $conexion;
+//     $rsql = $conexion->query("INSERT INTO nombresobjetos('codigo', 'numerico', 'nombre') VALUES (".$codigo.",".$numerico.",".$nombrestd.")");
+    $peticion = "INSERT INTO nombresobjetos VALUES ('".$codigo."','".$numerico."','".$nombrestd."')";
+    echo "<p>".$peticion."</p>";
+    if (!mysql_query($conexion, $peticion)){
+    echo "<p> No envia a la DB. </p>";
+    }
     print_r($array);
 }
 }
@@ -509,15 +521,17 @@ function masnombres($nomobj)
 
 function tablanombres($conexion)
 {
-  $rsql = $conexion->query("CREATE TABLE IF NOT EXISTS nombresobjetos (codigo varchar(15) UNIQUE, numerico varchar(15) UNIQUE, nombre varchar(50))");
+  $rsql = $conexion->query("CREATE TABLE IF NOT EXISTS nombresobjetos (codigo varchar(15) UNIQUE NOT NULL, numerico varchar(15) UNIQUE, nombre varchar(50))");
 }
 
 function consultanombreenbd($nombreconsulta)
 {
+  $rsql = $conexion->query("SELECT * FROM nombresobjetos WHERE codigo like '%%".$nombreconsulta."%%' OR numerico like '%%".$nombreconsulta."%%' OR nombre like '%%".$nombreconsulta."%%'");
   $rsql -> data_seek(0);
-  if ($rsql){
-  
+  while ($fila = $resultado->fetch_assoc()) {
+    echo " id = " . $fila['id'] . "\n";
   }
+
 
 }
 ?>
