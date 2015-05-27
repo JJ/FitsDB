@@ -341,7 +341,7 @@ else {
 
   
 
-$config = parse_ini_file("/etc/fitsdb.d/fitsdb.cfg",true);
+$config = parse_ini_file("/usr/local/etc/fitsdb.d/fitsdb.cfg",true);
 $mysql_user = $config['mysql']['user'];
 $mysql_pass = $config['mysql']['pass'];
 $mysql_dbname = $config['mysql']['dbname'];
