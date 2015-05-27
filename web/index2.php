@@ -344,15 +344,9 @@ else {
   
 
 // $config = parse_ini_file("/etc/fitsdb.d/fitsdb.cfg",true);
-$config = parse_ini_file("/usr/local/etc/fitsdb.d/fitsdb.cfg",true);
-$mysql_user = $config['mysql']['user'];
-$mysql_pass = $config['mysql']['pass'];
-$mysql_dbname = $config['mysql']['dbname'];
-$mysql_hostname = $config['mysql']['hostname'];
 
 
-global $conexion;
-$conexion = new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
+$conexion = conectarDB();
 $resultado = $conexion->query($peticion);
 $resultado -> data_seek(0);
 $archivos = array();
@@ -485,6 +479,19 @@ function limpieza($path)
     return false;
 }
 
+function conectarDB(){
+$config = parse_ini_file("/usr/local/etc/fitsdb.d/fitsdb.cfg",true);
+$mysql_user = $config['mysql']['user'];
+$mysql_pass = $config['mysql']['pass'];
+$mysql_dbname = $config['mysql']['dbname'];
+$mysql_hostname = $config['mysql']['hostname'];
+
+
+// global $conexion;
+// $conexion = new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
+return new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
+}
+
 function masnombres($nomobj)
 {
   if (strlen($nomobj) > 1){
@@ -508,7 +515,7 @@ function masnombres($nomobj)
     $codigo = $array[2];
     $numerico = $array[0];
     $nombrestd = $array[1];
-    global $conexion;
+    $conexion = conectarDB();
 //     $rsql = $conexion->query("INSERT INTO nombresobjetos('codigo', 'numerico', 'nombre') VALUES (".$codigo.",".$numerico.",".$nombrestd.")");
     $peticion = "INSERT INTO nombresobjetos VALUES ('".$codigo."','".$numerico."','".$nombrestd."')";
     echo "<p>".$peticion."</p>";
