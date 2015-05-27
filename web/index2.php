@@ -343,7 +343,8 @@ else {
 
   
 
-$config = parse_ini_file("/etc/fitsdb.d/fitsdb.cfg",true);
+// $config = parse_ini_file("/etc/fitsdb.d/fitsdb.cfg",true);
+$config = parse_ini_file("/usr/local/etc/fitsdb.d/fitsdb.cfg",true);
 $mysql_user = $config['mysql']['user'];
 $mysql_pass = $config['mysql']['pass'];
 $mysql_dbname = $config['mysql']['dbname'];
@@ -511,7 +512,8 @@ function masnombres($nomobj)
 //     $rsql = $conexion->query("INSERT INTO nombresobjetos('codigo', 'numerico', 'nombre') VALUES (".$codigo.",".$numerico.",".$nombrestd.")");
     $peticion = "INSERT INTO nombresobjetos VALUES ('".$codigo."','".$numerico."','".$nombrestd."')";
     echo "<p>".$peticion."</p>";
-    if (!mysql_query($conexion, $peticion)){
+//     if (!mysql_query($conexion, $peticion)){
+    if (!$conexion ->query($peticion)){
     echo "<p> No envia a la DB. </p>";
     }
     print_r($array);
