@@ -288,9 +288,9 @@ if (strlen($typeimg) != 0) {
   }
 
 if (strlen($nombre_obj) != 0) {
-  
-  $nombre_obj = str_replace(' ', '', $nombre_obj);
-  $sufijo = $sufijo . sprintf(" object like '%%%s%%'",$nombre_obj) . " and";
+  $arraynombres = masnombres($nombre_obj);
+  $codigosinespacio = str_replace(' ', '', $arraynombres[0]);
+  $sufijo = $sufijo . sprintf(" object like '%%%s%%' or object like '%%%s%%' or object like '%%%s%%' or object like '%%%s%%'",$arraynombres[0],$arraynombres[1],$arraynombres[2],$codigosinespacio) . " and";
   }
 
 if ((strlen($fecha_obs1) != 0) && (strlen($fecha_obs2) != 0)) {
@@ -350,8 +350,8 @@ $conexion = conectarDB();
 $resultado = $conexion->query($peticion);
 $resultado -> data_seek(0);
 $archivos = array();
-tablanombres($conexion);
-masnombres($nombre_obj);
+
+
 ?>
 <form id="form2" name="form2" method="post" action="download.php" align="right">
 <input type="submit" class ="button" name="descargazip" value="Descargar archivos comprimidos" />
@@ -525,6 +525,7 @@ function masnombres($nomobj)
     }
     // Aquí ya podemos devolver los nombres a buscar
 }
+return $array;
 }
 
 function nombresadb($codigo,$numerico,$nombrestd)
