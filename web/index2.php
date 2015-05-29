@@ -510,12 +510,18 @@ function masnombres($nomobj)
       $r = file_get_contents($url);
       preg_match("/[0-9]*\s\w*\s\([0-9]{4}\s\w*/",$r,$bingo);
       $paso1= explode(' (',$bingo[0]);
-      $array = explode(' ',$paso1[0]);
-      $array[] = $paso1[1];
-      $array[] = str_replace(' ','',$paso1[1]); // Aquí ya tiene todos los nombres listos para consultar tablaobs.
+      $arraytemp = explode(' ',$paso1[0]);
+      $arraytemp[] = $paso1[1];
+      $arraytemp[] = str_replace(' ','',$paso1[1]); // Aquí ya tiene todos los nombres listos para consultar tablaobs.
+      $array[] = $arraytemp[2];
+      $array[] = $arraytemp[0];
+      $array[] = $arraytemp[1];
+//       print_r($array);
   //     Introducimos los datos en la base de datos
-      nombresadb($array[2],$array[0],$array[1]);
-      print_r($array);
+      if (strlen($array[0]) > 1){
+        nombresadb($array[0],$array[1],$array[2]);
+        print_r($array);
+      }
     }
     // Aquí ya podemos devolver los nombres a buscar
 }
