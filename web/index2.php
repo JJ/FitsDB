@@ -13,6 +13,7 @@ define('DEBUG', false);
 //error_reporting(E_ALL);
 //ini_set('display_errors', true);
 limpieza('descargas/');
+tablanombres();
 // limpieza('sesion/');
 
 
@@ -287,10 +288,22 @@ if (strlen($typeimg) != 0) {
   $sufijo = $sufijo . sprintf(" imgtype like '%%%s%%'",$typeimg) . " and";
   }
 
-if (strlen($nombre_obj) != 0) {
-  $arraynombres = masnombres($nombre_obj);
-  $codigosinespacio = str_replace(' ', '', $arraynombres[0]);
-  $sufijo = $sufijo . sprintf(" object like '%%%s%%' or object like '%%%s%%' or object like '%%%s%%' or object like '%%%s%%'",$arraynombres[0],$arraynombres[1],$arraynombres[2],$codigosinespacio) . " and";
+$arraynombres = masnombres($nombre_obj);
+if ((strlen($arraynombres[0]) > 0) or (strlen($arraynombres[1]) > 0) or (strlen($arraynombres[2]) > 0)) {
+  $arraynombres[] = str_replace(' ', '', $arraynombres[0]);
+  $m = count($arraynombres);
+//   echo "<p>".$m."</p>";
+  $sufijo = $sufijo . " (";
+  for ($j=0; $j<$m; $j++)
+  {
+    if (strlen($arraynombres[$j]) > 0)
+    {
+      $sufijo = $sufijo . sprintf(" object like '%%%s%%' or",$arraynombres[$j]);
+    }
+  }
+  $fin = preg_replace('/or$/','',$sufijo);
+  $sufijo = $fin .")". " and";
+//   echo "<p>". $sufijo . "</p>";
   }
 
 if ((strlen($fecha_obs1) != 0) && (strlen($fecha_obs2) != 0)) {
@@ -318,7 +331,7 @@ if (strlen($filtro) != 0) {
 $sufijo = $sufijo . sprintf(" filter like '%%%s%%'",$filtro);
 }
 
-if ((strlen($idnum) != 0) || (strlen($typeimg) != 0) || (strlen($nombre_obj) != 0) || (strlen($fecha_obs1) != 0) || (strlen($fecha_obs2) != 0) ||(strlen($exptime1) != 0) ||(strlen($exptime2) != 0) || (strlen($observatorio) != 0) || (strlen($telescopio) != 0) || (strlen($instrumento) != 0) || (strlen($filtro) != 0)) {
+if ((strlen($idnum) != 0) || (strlen($typeimg) != 0) || (strlen($arraynombres[0]) != 0) || (strlen($fecha_obs1) != 0) || (strlen($fecha_obs2) != 0) ||(strlen($exptime1) != 0) ||(strlen($exptime2) != 0) || (strlen($observatorio) != 0) || (strlen($telescopio) != 0) || (strlen($instrumento) != 0) || (strlen($filtro) != 0)) {
   $montamos = $prefijo . " WHERE" . $sufijo;
   $peticion = preg_replace('/and$/', '', $montamos);
 //   echo "<table width='500' align='left'><tr><td>Se muestra la siguiente petición:</td><td> </td></tr>";
@@ -335,6 +348,7 @@ if ((strlen($idnum) != 0) || (strlen($typeimg) != 0) || (strlen($nombre_obj) != 
 //   echo "<br>";
 
 echo "Se muestran los resultados de su consulta.";
+// echo "<p>".$peticion."</p>";
   }
 else {
   $peticion = "SELECT id, object, telescope, instrument, dateobs, timeobs, filter, imgtype, exptime, observatory, rute FROM tablaobs WHERE DATE_SUB(CURDATE(), INTERVAL 31 DAY) <= dateobs ORDER BY dateobs DESC";
@@ -502,10 +516,11 @@ function masnombres($nomobj)
     }
     // Consultar $nomobj en nombresobjetos
     $array = consultanombreenbd($nomobj);
-    print_r($array);
+//     print_r($array);
     if (!(strlen($array[0]) > 1))
     {
       $nomobj = strtoupper($nomobj);
+      echo "<p>Consulta de nombres en JPL Horizons.</p>";
       $url = 'http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND=%27' . urlencode($nomobj) . '%27&MAKE_EPHEM=%27YES%27%20%20%20%20&TABLE_TYPE=%27OBSERVER%27&START_TIME=%272000-12-30%27&STOP_TIME=%272000-12-31%27&STEP_SIZE=%272160%20m%27%20%20%20%20&QUANTITIES=%271%27&CSV_FORMAT=%27YES%27&ANG_FORMAT=%27DEG%27';
       $r = file_get_contents($url);
       preg_match("/[0-9]*\s\w*\s\([0-9]{4}\s\w*/",$r,$bingo);
@@ -513,18 +528,22 @@ function masnombres($nomobj)
       $arraytemp = explode(' ',$paso1[0]);
       $arraytemp[] = $paso1[1];
       $arraytemp[] = str_replace(' ','',$paso1[1]); // Aquí ya tiene todos los nombres listos para consultar tablaobs.
-      $array[] = $arraytemp[2];
-      $array[] = $arraytemp[0];
-      $array[] = $arraytemp[1];
+      $array[0] = $arraytemp[2];
+      $array[1] = $arraytemp[0];
+      $array[2] = $arraytemp[1];
 //       print_r($array);
   //     Introducimos los datos en la base de datos
       if (strlen($array[0]) > 1){
         nombresadb($array[0],$array[1],$array[2]);
-        print_r($array);
+//         print_r($array);
       }
+    }
+    else{
+    echo "<p>Consulta de nombres en local.</p>";
     }
     // Aquí ya podemos devolver los nombres a buscar
 }
+// print_r($array);
 return $array;
 }
 
@@ -532,10 +551,9 @@ function nombresadb($codigo,$numerico,$nombrestd)
 {
     $conexion = conectarDB();
     $peticion = "INSERT INTO nombresobjetos VALUES ('".$codigo."','".$numerico."','".$nombrestd."')";
-    echo "<p>".$peticion."</p>";
 //     if (!mysql_query($conexion, $peticion)){
     if (!$conexion ->query($peticion)){
-    echo "<p> No envia a la DB. </p>";
+//     echo "<p> No envia a la DB. </p>";
     }
 }
 
@@ -551,7 +569,12 @@ function consultanombreenbd($nombreconsulta)
   $rsql = $conexion->query("SELECT * FROM nombresobjetos WHERE codigo like '%%".$nombreconsulta."%%' OR numerico like '%%".$nombreconsulta."%%' OR nombre like '%%".$nombreconsulta."%%'");
   $rsql -> data_seek(0);
   $fila = $rsql->fetch_assoc();
-  $filabuena = array_values($fila);
+  if (count($fila) >0){
+    $filabuena = array_values($fila);
+  }
+  else{
+  $filabuena=array('','','');
+  }
   return $filabuena;
 }
 ?>
