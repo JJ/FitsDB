@@ -495,7 +495,7 @@ return new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
 function masnombres($nomobj)
 {
   if (strlen($nomobj) > 1){
-    if (preg_match('/[0-9]{4}[A-Za-z]{2}[0-9]*/',$nomobj)) // Esto reescribe el código bien, con el espacio después del año
+    if (preg_match('/[0-9]{4}[A-Za-z]{2}[0-9]*/',$nomobj)) // Esto reescribe el nombre código bien, con el espacio después del año
     {
       preg_match('/^[0-9]{4}/',$nomobj,$cifra);
       $nomobj = preg_replace('/^[0-9]{4}/',$cifra[0].' ',$nomobj);
@@ -509,24 +509,22 @@ function masnombres($nomobj)
     $array = explode(' ',$paso1[0]);
     $array[] = $paso1[1];
     $array[] = str_replace(' ','',$paso1[1]); // Aquí ya tiene todos los nombres listos para consultar tablaobs.
-    
-    
 //     Introducimos los datos en la base de datos
-    $codigo = $array[2];
-    $numerico = $array[0];
-    $nombrestd = $array[1];
+    nombresadb($array[2],$array[0],$array[1]);
+    print_r($array);
+}
+}
+
+function nombresadb($codigo,$numerico,$nombrestd)
+{
     $conexion = conectarDB();
-//     $rsql = $conexion->query("INSERT INTO nombresobjetos('codigo', 'numerico', 'nombre') VALUES (".$codigo.",".$numerico.",".$nombrestd.")");
     $peticion = "INSERT INTO nombresobjetos VALUES ('".$codigo."','".$numerico."','".$nombrestd."')";
     echo "<p>".$peticion."</p>";
 //     if (!mysql_query($conexion, $peticion)){
     if (!$conexion ->query($peticion)){
     echo "<p> No envia a la DB. </p>";
     }
-    print_r($array);
 }
-}
-
 
 function tablanombres($conexion)
 {
