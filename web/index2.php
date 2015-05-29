@@ -521,7 +521,7 @@ function masnombres($nomobj)
     {
       $nomobj = strtoupper($nomobj);
       echo "<p>Consulta de nombres en JPL Horizons.</p>";
-      $url = 'http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND=%27' . urlencode($nomobj) . '%27&MAKE_EPHEM=%27YES%27%20%20%20%20&TABLE_TYPE=%27OBSERVER%27&START_TIME=%272000-12-30%27&STOP_TIME=%272000-12-31%27&STEP_SIZE=%272160%20m%27%20%20%20%20&QUANTITIES=%271%27&CSV_FORMAT=%27YES%27&ANG_FORMAT=%27DEG%27';
+      $url = 'http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND=%27' . urlencode($nomobj) . '%27&MAKE_EPHEM=%27no%27';
       $r = file_get_contents($url);
       preg_match("/[0-9]*\s\w*\s\([0-9]{4}\s\w*/",$r,$bingo);
       $paso1= explode(' (',$bingo[0]);
