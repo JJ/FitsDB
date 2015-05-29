@@ -500,18 +500,24 @@ function masnombres($nomobj)
       preg_match('/^[0-9]{4}/',$nomobj,$cifra);
       $nomobj = preg_replace('/^[0-9]{4}/',$cifra[0].' ',$nomobj);
     }
-    
-    $nomobj = strtoupper($nomobj);
-    $url = 'http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND=%27' . urlencode($nomobj) . '%27&MAKE_EPHEM=%27YES%27%20%20%20%20&TABLE_TYPE=%27OBSERVER%27&START_TIME=%272000-12-30%27&STOP_TIME=%272000-12-31%27&STEP_SIZE=%272160%20m%27%20%20%20%20&QUANTITIES=%271%27&CSV_FORMAT=%27YES%27&ANG_FORMAT=%27DEG%27';
-    $r = file_get_contents($url);
-    preg_match("/[0-9]*\s\w*\s\([0-9]{4}\s\w*/",$r,$bingo);
-    $paso1= explode(' (',$bingo[0]);
-    $array = explode(' ',$paso1[0]);
-    $array[] = $paso1[1];
-    $array[] = str_replace(' ','',$paso1[1]); // Aquí ya tiene todos los nombres listos para consultar tablaobs.
-//     Introducimos los datos en la base de datos
-    nombresadb($array[2],$array[0],$array[1]);
+    // Consultar $nomobj en nombresobjetos
+    $array = consultanombreenbd($nomobj);
     print_r($array);
+    if (!(strlen($array[0]) > 1))
+    {
+      $nomobj = strtoupper($nomobj);
+      $url = 'http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND=%27' . urlencode($nomobj) . '%27&MAKE_EPHEM=%27YES%27%20%20%20%20&TABLE_TYPE=%27OBSERVER%27&START_TIME=%272000-12-30%27&STOP_TIME=%272000-12-31%27&STEP_SIZE=%272160%20m%27%20%20%20%20&QUANTITIES=%271%27&CSV_FORMAT=%27YES%27&ANG_FORMAT=%27DEG%27';
+      $r = file_get_contents($url);
+      preg_match("/[0-9]*\s\w*\s\([0-9]{4}\s\w*/",$r,$bingo);
+      $paso1= explode(' (',$bingo[0]);
+      $array = explode(' ',$paso1[0]);
+      $array[] = $paso1[1];
+      $array[] = str_replace(' ','',$paso1[1]); // Aquí ya tiene todos los nombres listos para consultar tablaobs.
+  //     Introducimos los datos en la base de datos
+      nombresadb($array[2],$array[0],$array[1]);
+      print_r($array);
+    }
+    // Aquí ya podemos devolver los nombres a buscar
 }
 }
 
@@ -526,20 +532,20 @@ function nombresadb($codigo,$numerico,$nombrestd)
     }
 }
 
-function tablanombres($conexion)
+function tablanombres()
 {
+$conexion = conectarDB();
   $rsql = $conexion->query("CREATE TABLE IF NOT EXISTS nombresobjetos (codigo varchar(15) UNIQUE NOT NULL, numerico varchar(15) UNIQUE, nombre varchar(50))");
 }
 
 function consultanombreenbd($nombreconsulta)
 {
+  $conexion = conectarDB();
   $rsql = $conexion->query("SELECT * FROM nombresobjetos WHERE codigo like '%%".$nombreconsulta."%%' OR numerico like '%%".$nombreconsulta."%%' OR nombre like '%%".$nombreconsulta."%%'");
   $rsql -> data_seek(0);
-  while ($fila = $resultado->fetch_assoc()) {
-    echo " id = " . $fila['id'] . "\n";
-  }
-
-
+  $fila = $rsql->fetch_assoc();
+  $filabuena = array_values($fila);
+  return $filabuena;
 }
 ?>
 
