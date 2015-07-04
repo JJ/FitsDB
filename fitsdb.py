@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # -*- coding: utf8 -*-
 # Extracción de campos de archivos fits
 import os, sys
@@ -78,6 +78,7 @@ def CheckFileExistence(nombrearchivo):
 
 def CheckConfFile():
   global config
+  import ConfigParser
   if os.path.exists("/usr/local/etc/fitsdb.d/fitsdb.cfg"):
     config = ConfigParser.RawConfigParser()
     config.read('/usr/local/etc/fitsdb.d/fitsdb.cfg')
@@ -496,7 +497,6 @@ def CrearTablaObs():
 def IniciarDB():
   if CheckConfFile():
     import MySQLdb
-    import ConfigParser
     varUser = config.get('mysql', 'user')
     varPass = config.get('mysql', 'pass')
     varDBName = config.get('mysql', 'dbname')

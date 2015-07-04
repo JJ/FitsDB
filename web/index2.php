@@ -8,7 +8,7 @@ FitsDB v0.1.1-1
 <div id='main'>
 <?php
 set_time_limit(0);
-define('DEBUG', false);
+define('DEBUG', true);
 // session_start();
 //error_reporting(E_ALL);
 //ini_set('display_errors', true);
@@ -299,6 +299,7 @@ if ((strlen($arraynombres[0]) > 0) or (strlen($arraynombres[1]) > 0) or (strlen(
     if (strlen($arraynombres[$j]) > 0)
     {
       $sufijo = $sufijo . sprintf(" object like '%%%s%%' or",$arraynombres[$j]);
+      $sufijo = $sufijo . sprintf(" rute like '%%%s%%' or",$arraynombres[$j]);
     }
   }
   $fin = preg_replace('/or$/','',$sufijo);
@@ -533,9 +534,12 @@ function masnombres($nomobj)
       $array[2] = $arraytemp[1];
 //       print_r($array);
   //     Introducimos los datos en la base de datos
-      if (strlen($array[0]) > 1){
+      if (strlen($array[0]) > 2){
         nombresadb($array[0],$array[1],$array[2]);
 //         print_r($array);
+      }
+      else{
+        $array[0] = $nomobj;
       }
     }
     else{
