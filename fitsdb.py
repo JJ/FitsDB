@@ -76,12 +76,15 @@ def CheckFileExistence(nombrearchivo):
     return 0
 
 
-def CheckConfFileExistence():
-  if os.path.exists("./config.cfg"):
+def CheckConfFile():
+  global config
+  if os.path.exists("/usr/local/etc/fitsdb.d/fitsdb.cfg"):
+    config = ConfigParser.RawConfigParser()
+    config.read('/usr/local/etc/fitsdb.d/fitsdb.cfg')
     return 1
-  elif not os.path.exists("./config.cfg"):
+  elif not os.path.exists("/usr/local/etc/fitsdb.d/fitsdb.cfg"):
     import shutil
-    shutil.copy("./config.cfg.new","./config.cfg")
+    shutil.copy("/usr/local/etc/fitsdb.d/fitsdb.cfg.new","/usr/local/etc/fitsdb.d/fitsdb.cfg")
     ErrorSQL()
     sys.exit()
 
@@ -491,12 +494,9 @@ def CrearTablaObs():
 
 
 def IniciarDB():
-  if CheckConfFileExistence():
+  if CheckConfFile():
     import MySQLdb
     import ConfigParser
-    global config
-    config = ConfigParser.RawConfigParser()
-    config.read('/usr/local/etc/fitsdb.d/fitsdb.cfg')
     varUser = config.get('mysql', 'user')
     varPass = config.get('mysql', 'pass')
     varDBName = config.get('mysql', 'dbname')
