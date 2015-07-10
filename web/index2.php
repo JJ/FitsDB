@@ -220,11 +220,19 @@ function cambiar(){
 	?>
 	<datalist id="listaobservatorio">
 	<?php
-	$arrayobservatorio = array('OSN','DSAZ','CGG','Teide','Atacama','IAC','la hita','lapalma');
-	natsort($arrayobservatorio);
-	foreach($arrayobservatorio as $i){
-	  echo "<option value='".$i."'>".$i."</option>";
-	}
+	$conexion = conectarDB();
+        $rsqlo = $conexion->query("SELECT observatory FROM tablaobs GROUP BY observatory");
+        $rsqlo -> data_seek(0);
+	while ($fila = $rsqlo->fetch_assoc()){
+          $filabuena = array_values($fila);
+          $num = count($filabuena);
+          echo "<option value='".$filabuena[0]."'>".$filabuena[0]."</option>";
+        }
+	//$arrayobservatorio = array('OSN','DSAZ','CGG','Teide','Atacama','IAC','la hita','lapalma');
+	//natsort($arrayobservatorio);
+	//foreach($arrayobservatorio as $i){
+	//  echo "<option value='".$i."'>".$i."</option>";
+	//}
 	?>
 	</datalist>
     </td>
@@ -581,6 +589,8 @@ function consultanombreenbd($nombreconsulta)
   }
   return $filabuena;
 }
+
+
 ?>
 
 
