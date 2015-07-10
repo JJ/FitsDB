@@ -6,3 +6,6 @@ hostname =
 
 [general]
 fechaenruta = 0
+
+[logging]
+path = /var/local/fitsdb.d/

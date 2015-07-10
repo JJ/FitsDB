@@ -5,17 +5,14 @@ import os, sys
 from os import listdir, walk
 from datetime import datetime
 
-print "Inicio: " + str(datetime.utcnow())
+#print "Inicio: " + str(datetime.utcnow())
 
-# HAY QUE IMPLEMENTAR UN LOG
-#import logging
-#LOG_FILENAME = 'fitsdb.log'
-#logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO)
-#https://docs.python.org/2.6/library/logging.html
+
 
 
 def ErrorSQL():
   from termcolor import colored
+  logging.info('Error relacionado con la base de datos!')
   print colored ("¡ERROR!", "red")
   print "No se ha encontrado o no se ha podido acceder al archivo de configuración"
   print "necesario para el uso de la base de datos MySQL."
@@ -37,6 +34,7 @@ def ErrorSQL():
 
 def ErrorNoArg():
   from termcolor import colored
+  logging.info('Faltan argumentos! No se ejecutó el escaneo.')
   print colored ("¡ERROR!", "red")
   print "Para que el programa funcione correctamente tiene que añadirle un argumento."
   print "A continuación se muestra un ejemplo:"
@@ -52,6 +50,7 @@ def ErrorNoArg():
 
 def ErrorMuchosArg():
   from termcolor import colored
+  logging.info('Demasiados argumentos! No se ejecutó el escaneo.')
   print colored ("¡ERROR!", "red")
   print "Solo se admite un único argumento: un directorio que contenga las imagenes"
   print "del tipo .fits, .fit y/o .fts"
@@ -503,7 +502,8 @@ def IniciarDB():
     varHost = config.get('mysql', 'hostname')
     if (varUser == "") or (varPass == "") or (varDBName == "") or (varHost == ""):
       print ErrorSQL()
-      sys.exit()  
+      logging.info('Faltan datos para conectar con la base de datos. Comprobar archivo de configuración.')
+      sys.exit()
     else:
       global db
       db = MySQLdb.connect(host=varHost,user=varUser,passwd=varPass,db=varDBName)
@@ -511,9 +511,16 @@ def IniciarDB():
       cur = db.cursor()
       #cur.execute("SHOW TABLES")
       CrearTablaObs()
+      logging.info('Conexión a la base de datos realizada con éxito.')
 
 
-
+def IniciarLogging():
+  import logging
+  if CheckConfFile():
+    LOG_FILENAME = config.get('log', 'path') + 'fitsdb.log'
+    global logging
+    logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO,format='%(asctime)s %(levelname)s %(message)s')
+    
 
 
 
@@ -606,6 +613,8 @@ elif len(sys.argv) == 1:
   ErrorNoArg()
   sys.exit()
 
+IniciarLogging()
+logging.info('Iniciando FitsDB...')
 IniciarDB()
 #archivo_nombres_campos = "nombres_de_campos"
 
@@ -632,6 +641,8 @@ for (path, ficheros, archivos) in walk (directorio_imagenes):
 
 
 msgfin = "Se han procesado " + str(j) + " archivos.", "green"
+logging.info('Se han procesado %s archivos.', str(j))
+logging.info('Fin del escaneo. Se cierra Fitsdb.')
 from termcolor import colored
 print "Fin: " + str(datetime.utcnow())
 print colored (msgfin, "green")
