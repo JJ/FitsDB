@@ -532,7 +532,7 @@ def CheckDB(suma): # más que suma debe recibir la ruta del archivo como argumen
     return 0
 
 
-def CheckDB2(ruta): # más que suma debe recibir la ruta del archivo como argumento
+def CheckDB2(ruta):
   cur.execute('SELECT rute FROM tablaobs WHERE rute = %s',(os.path.abspath(ruta),))
   if cur.fetchone():
     return 1
@@ -646,4 +646,3 @@ logging.info('Fin del escaneo. Se cierra Fitsdb.')
 from termcolor import colored
 print "Fin: " + str(datetime.utcnow())
 print colored (msgfin, "green")
-
