@@ -5,14 +5,10 @@ import os, sys
 from os import listdir, walk
 from datetime import datetime
 
-#print "Inicio: " + str(datetime.utcnow())
 
 
-
-
-def ErrorSQL():
+def Error1():
   from termcolor import colored
-  logging.info('Error relacionado con la base de datos!')
   print colored ("¡ERROR!", "red")
   print "No se ha encontrado o no se ha podido acceder al archivo de configuración"
   print "necesario para el uso de la base de datos MySQL."
@@ -83,9 +79,9 @@ def CheckConfFile():
     config.read('/usr/local/etc/fitsdb.d/fitsdb.cfg')
     return 1
   elif not os.path.exists("/usr/local/etc/fitsdb.d/fitsdb.cfg"):
-    import shutil
-    shutil.copy("/usr/local/etc/fitsdb.d/fitsdb.cfg.new","/usr/local/etc/fitsdb.d/fitsdb.cfg")
-    ErrorSQL()
+    #import shutil
+    #shutil.copy("/usr/local/etc/fitsdb.d/fitsdb.cfg.new","/usr/local/etc/fitsdb.d/fitsdb.cfg")
+    Error1()
     sys.exit()
 
 
@@ -466,6 +462,7 @@ def BuscaFilter(cabecera,listaCampos):
     if i in (s.rstrip(' ') for s in listaCampos):
       if cabecera[i] != '':
 	return cabecera[i]
+
 	break
   #print ruta
   #print listaCampos
@@ -475,22 +472,25 @@ def BuscaFilter(cabecera,listaCampos):
 
 
 def CrearTablaObs():
-  cur.execute("""CREATE TABLE IF NOT EXISTS tablaobs
-  (id BIGINT NOT NULL UNIQUE AUTO_INCREMENT,
-  moddate TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  md5sum CHAR(32),
-  imgtype VARCHAR(20),
-  object VARCHAR(30),
-  dateobs DATE,
-  timeobs TIME,
-  exptime INT,
-  observatory VARCHAR(80),
-  telescope VARCHAR(80),
-  instrument VARCHAR(80),
-  filter VARCHAR(50),
-  rute VARCHAR(200) NOT NULL)""")
-  cur.execute("SET NAMES 'utf8'")
-  cur.execute("SET CHARACTER SET utf8")
+  try:
+    cur.execute("""CREATE TABLE IF NOT EXISTS tablaobs
+    (id BIGINT NOT NULL UNIQUE AUTO_INCREMENT,
+    moddate TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    md5sum CHAR(32),
+    imgtype VARCHAR(20),
+    object VARCHAR(30),
+    dateobs DATE,
+    timeobs TIME,
+    exptime INT,
+    observatory VARCHAR(80),
+    telescope VARCHAR(80),
+    instrument VARCHAR(80),
+    filter VARCHAR(50),
+    rute VARCHAR(200) NOT NULL)""")
+    cur.execute("SET NAMES 'utf8'")
+    cur.execute("SET CHARACTER SET utf8")
+  except:
+    logging.info('No se pudo crear la tabla \'tablaobs\' en la base de datos.')
 
 
 def IniciarDB():
@@ -501,17 +501,20 @@ def IniciarDB():
     varDBName = config.get('mysql', 'dbname')
     varHost = config.get('mysql', 'hostname')
     if (varUser == "") or (varPass == "") or (varDBName == "") or (varHost == ""):
-      print ErrorSQL()
+      print Error1()
       logging.info('Faltan datos para conectar con la base de datos. Comprobar archivo de configuración.')
       sys.exit()
     else:
-      global db
-      db = MySQLdb.connect(host=varHost,user=varUser,passwd=varPass,db=varDBName)
-      global cur
-      cur = db.cursor()
-      #cur.execute("SHOW TABLES")
-      CrearTablaObs()
-      logging.info('Conexión a la base de datos realizada con éxito.')
+      try:
+        global db
+        db = MySQLdb.connect(host=varHost,user=varUser,passwd=varPass,db=varDBName)
+        global cur
+        cur = db.cursor()
+        #cur.execute("SHOW TABLES")
+        CrearTablaObs()
+        logging.info('Conexión a la base de datos realizada con éxito.')
+      except:
+        logging.info('Error al conectar con la base de datos.')
 
 
 def IniciarLogging():
@@ -566,6 +569,7 @@ def BloquePrincipal(url,suma,fuente):
       Observatorio = 'IAC'
     else:
       Observatorio = BuscaObservatorio(cabecera,listaCampos)
+      
     Object,ImgType = BuscaObjYType(cabecera,listaCampos)
     Filter = BuscaFilter(cabecera, listaCampos)
 
@@ -574,6 +578,7 @@ def BloquePrincipal(url,suma,fuente):
       cur.execute("""INSERT INTO tablaobs VALUES ('NULL',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(datetime.utcnow(),suma,ImgType,Object,par[0],par[1],par[2],Observatorio,Telescopio,Instr,Filter,os.path.abspath(url)))
       db.commit()
     except:
+      logging.info('Error al escribir en la base de datos la información de %s.',url)
       print "---> No se ha podido introducir los datos del archivo: " + url
       pass
 
@@ -581,24 +586,22 @@ def BloquePrincipal(url,suma,fuente):
     fuente.close()
     
 def GetData(url):
-  #suma = HashFile(url)
-  suma =''
-  if CheckDB2(url):
-    pass
-  else:
-    import pyfits
-    #hdu.verify('silentfix')
+  import pyfits
+  #hdu.verify('silentfix')
+  try:
+    fuente = pyfits.open(url)
+    BloquePrincipal(url,suma,fuente)
+  except:
+    logging.info('Error al abrir %s. Intentando reparar la cabecera...',url)
     try:
+      fuente.verify('silentfix')
       fuente = pyfits.open(url)
+      logging.info('Archivo reparado con éxito.')
       BloquePrincipal(url,suma,fuente)
     except:
-      try:
-        fuente.verify('silentfix')
-        fuente = pyfits.open(url)
-        BloquePrincipal(url,suma,fuente)
-      except:
-        print "---> Error al abrir " + url
-        pass
+      logging.info('Error. No se pudo reparar la cabecera. El archivo %s no ha sido incluido en la base de datos.',url)
+      print "---> Error al abrir " + url
+      pass
 
     
 
@@ -618,31 +621,45 @@ logging.info('Iniciando FitsDB...')
 IniciarDB()
 #archivo_nombres_campos = "nombres_de_campos"
 
-j = 0
+rev = 0
+nuevos = 0
+
+logging.info('Iniciando barrido en busca de archivos zip.')
 for (path, ficheros, archivos) in walk (directorio_imagenes):
   for archivo in archivos:
     if archivo.endswith(".zip"):
       import zipfile
       ruta = path + '/' + archivo
       ruta = ruta.replace('//','/')
+      logging.info('Zip encontrado! Iniciando descompresión.')
       sitio = path + '/' + archivo.strip('.zip')
-      zipfile.ZipFile(ruta).extractall(sitio)
-      os.remove(ruta)
-      
+      try:
+        zipfile.ZipFile(ruta).extractall(sitio)
+        os.remove(ruta)
+        logging.info('Zip descomprimido con éxito.')
+      except:
+        logging.info('Error al descomprimir el archivo Zip %s.',ruta)
+logging.info('Finalizado el barrido en busca de archivos Zip.')
 
+
+logging.info('Iniciando barrido en busca de archivos fit/fits.')
 for (path, ficheros, archivos) in walk (directorio_imagenes):
   for archivo in archivos:
     if archivo.endswith(".fits") or archivo.endswith(".fit") or archivo.endswith(".fts"):
       ruta = path + '/' + archivo
       ruta = ruta.replace('//','/')
       #AddCampos(ruta, archivo_nombres_campos) # En desuso. Para listar todos los campos existentes
-      GetData(ruta)
-      j += 1
+      if CheckDB2(ruta):
+        pass
+      else:
+        GetData(ruta)
+        nuevo += 1
+      rev += 1
 
 
-msgfin = "Se han procesado " + str(j) + " archivos.", "green"
-logging.info('Se han procesado %s archivos.', str(j))
-logging.info('Fin del escaneo. Se cierra Fitsdb.')
+msgfin = "Se han procesado " + str(rev) + " archivos.\n Se han incluido "+str(nuevos)+" archivos a la base de datos.", "green"
+logging.info('Se han procesado %s archivos. %s de ellos son nuevos.', str(rev), str(nuevos))
+logging.info('Fin del escaneo. Se cierra Fitsdb.\n\n')
 from termcolor import colored
 print "Fin: " + str(datetime.utcnow())
 print colored (msgfin, "green")
