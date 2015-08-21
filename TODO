@@ -1,8 +1,12 @@
 # TODO
 
-- Hay que solucionar eso. Hay que asegurarse de que solo recurre a FechaDelNombre cuando no ha encontrado la fecha entre los campos. Esto se va a implementar mediante una 
-opción en el archivo de configuración.
+- Hay que solucionar eso. Hay que asegurarse de que solo recurre a FechaDelNombre cuando no ha encontrado la fecha entre los campos. Esto se va a implementar mediante una opción en el archivo de configuración.
 - Muchas veces no se encuentra el tiempo de exposición. No estoy seguro si esto se podrá mejorar o no.
 - BuscaObject2 no funciona correctamente +Podría estar resuelto+
 - En los nombres de objetos según nomenclatura hay muchas veces guiones o barras bajas que quizás convendría quitar.
 - Hay problemas al leer la etiqueta UT porque por lo visto no pertenece al estándar FITS. El problema se trata en BuscaHora2, y en parte está solucionado con una expresión regular.
+
+- Hacer que roten los archivos del log.
+    http://www.blog.pythonlibrary.org/2014/02/11/python-how-to-create-rotating-logs/
+    https://docs.python.org/2/library/logging.handlers.html
+- Instalador.
