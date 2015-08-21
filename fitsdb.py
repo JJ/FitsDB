@@ -62,13 +62,13 @@ def ErrorMuchosArg():
   print " "
 
 
-
-def CheckFileExistence(nombrearchivo):
-  if os.path.exists(nombrearchivo):
-    return 1
-  elif not os.path.exists(nombrearchivo):
-    file(nombrearchivo, 'w').close()
-    return 0
+# EN DESUSO
+#def CheckFileExistence(nombrearchivo):
+  #if os.path.exists(nombrearchivo):
+    #return 1
+  #elif not os.path.exists(nombrearchivo):
+    #file(nombrearchivo, 'w').close()
+    #return 0
 
 
 def CheckConfFile():
@@ -85,22 +85,23 @@ def CheckConfFile():
     sys.exit()
 
 
-def AddCampos(url, salida): # En desuso
-  listaDatos = pyfits.open(url)
-  listaCamposNuevos = listaDatos[0].header.keys()
-  if CheckFileExistence(salida):
-    fileCampos = open(salida, 'r')
-    listaCampos = fileCampos.read().splitlines()
-    for strCampoNuevo in listaCamposNuevos:
-      if strCampoNuevo not in (s.rstrip(' ') for s in listaCampos):
-	fileCampos = open(salida, 'a')
-	fileCampos.write(strCampoNuevo + ' \n')
-  else:
-    for strCampoNuevo in listaCamposNuevos:
-      fileCampos = open(salida, 'a')
-      fileCampos.write(strCampoNuevo + ' \n')
-  fileCampos.close()
-  listaDatos.close()
+# EN DESUSO
+#def AddCampos(url, salida): # En desuso
+  #listaDatos = pyfits.open(url)
+  #listaCamposNuevos = listaDatos[0].header.keys()
+  #if CheckFileExistence(salida):
+    #fileCampos = open(salida, 'r')
+    #listaCampos = fileCampos.read().splitlines()
+    #for strCampoNuevo in listaCamposNuevos:
+      #if strCampoNuevo not in (s.rstrip(' ') for s in listaCampos):
+	#fileCampos = open(salida, 'a')
+	#fileCampos.write(strCampoNuevo + ' \n')
+  #else:
+    #for strCampoNuevo in listaCamposNuevos:
+      #fileCampos = open(salida, 'a')
+      #fileCampos.write(strCampoNuevo + ' \n')
+  #fileCampos.close()
+  #listaDatos.close()
 
 
 
@@ -166,14 +167,15 @@ def MJD2Date2(entrada): # En desuso
   return par
 
 
-def FormatoFecha(cadena):
-  if 'T' in cadena:
-    par = cadena.split("T")
-    par[0] = par[0].replace('/','-')
-    par[1] = par[1].replace('-',':')
-  else:
-    par = [cadena.replace('/','-'),'']
-  return par
+# EN DESUSO
+#def FormatoFecha(cadena):
+  #if 'T' in cadena:
+    #par = cadena.split("T")
+    #par[0] = par[0].replace('/','-')
+    #par[1] = par[1].replace('-',':')
+  #else:
+    #par = [cadena.replace('/','-'),'']
+  #return par
  
 
 def FormatoFecha2(fechabruta):
@@ -194,16 +196,6 @@ def FormatoFecha2(fechabruta):
   return arrayFechabruta[0],arrayFechabruta[1]
 
 
-# NO SE HA LLEGADO A USAR
-#def EstCom(comentario,buscamos):
-  #palabras = comentario.split(' ')
-  #for i in palabras:
-    #if i == buscamos:
-      #return 1
-      #break
-  #return 0
-
-
 def BuscaCosasEnCadena(cadena,arraycosas):
   for j in arraycosas:
     if cadena.lower().find(j.lower()) >= 0:
@@ -222,14 +214,15 @@ def TiempoExp(cabecera,listaCampos):
     #print "No se encuentra el tiempo de exposición."
     
     
-def BuscaHora(cabecera, listaCampos):
-  CamposHora=['TIME-OBS','TIME_OBS','UTSTART','UT','EXPSTART','TIME-INI']
-  for i in CamposHora:
-    if i in (s.rstrip(' ') for s in listaCampos):
-      if cabecera[i] != '':
-	return cabecera[i].rstrip(' ')
-	break
-  return 'UNK'
+# EN DESUSO
+#def BuscaHora(cabecera, listaCampos):
+  #CamposHora=['TIME-OBS','TIME_OBS','UTSTART','UT','EXPSTART','TIME-INI']
+  #for i in CamposHora:
+    #if i in (s.rstrip(' ') for s in listaCampos):
+      #if cabecera[i] != '':
+	#return cabecera[i].rstrip(' ')
+	#break
+  #return 'UNK'
 
 
 def BuscaHora2(cabecera, listaCampos):
@@ -256,37 +249,38 @@ def BuscaHora2(cabecera, listaCampos):
         return '0'
 
 
-def TratamientoFecha(nomcampo,valcampo,comcampo): # Recibe los comentarios como argumento porque a veces hay info útil
-  if nomcampo == "DATE-OBS":
-    par = FormatoFecha(valcampo)
-    par.extend([''])
-  elif nomcampo == "DATE_OBS":
-    par = FormatoFecha(valcampo)
-    par.extend([''])
-  elif nomcampo == "DATE-AVG":
-    par = FormatoFecha(valcampo)
-    par.extend([''])
-    par.extend(['0']) # No hay que +/- T.exposición
-  elif nomcampo == "DATE":
-    par = FormatoFecha(valcampo)
-    par.extend([''])
-  elif nomcampo == "JD":
-    par = JD2Date(str(valcampo))
-    par.extend([''])
-  elif nomcampo == "JUL-DATE":
-    par = JD2Date(str(valcampo))
-    par.extend([''])
-  elif nomcampo == "JUL_DATE":
-    par = JD2Date(str(valcampo))
-    par.extend([''])
-  elif nomcampo == "JD-HELIO":
-    par.extend(['0']) # No hay que +/- T.exposición
-  elif nomcampo == "JD_HELIO":
-    par.extend(['0']) # No hay que +/- T.exposición
-  else:
-    print "No se encuentra " +'\"'+ nomcampo +'\"'+ '\t\t' + ruta
-    par.extend([''])
-  return par
+# EN DESUSO
+#def TratamientoFecha(nomcampo,valcampo,comcampo): # Recibe los comentarios como argumento porque a veces hay info útil
+  #if nomcampo == "DATE-OBS":
+    #par = FormatoFecha(valcampo)
+    #par.extend([''])
+  #elif nomcampo == "DATE_OBS":
+    #par = FormatoFecha(valcampo)
+    #par.extend([''])
+  #elif nomcampo == "DATE-AVG":
+    #par = FormatoFecha(valcampo)
+    #par.extend([''])
+    #par.extend(['0']) # No hay que +/- T.exposición
+  #elif nomcampo == "DATE":
+    #par = FormatoFecha(valcampo)
+    #par.extend([''])
+  #elif nomcampo == "JD":
+    #par = JD2Date(str(valcampo))
+    #par.extend([''])
+  #elif nomcampo == "JUL-DATE":
+    #par = JD2Date(str(valcampo))
+    #par.extend([''])
+  #elif nomcampo == "JUL_DATE":
+    #par = JD2Date(str(valcampo))
+    #par.extend([''])
+  #elif nomcampo == "JD-HELIO":
+    #par.extend(['0']) # No hay que +/- T.exposición
+  #elif nomcampo == "JD_HELIO":
+    #par.extend(['0']) # No hay que +/- T.exposición
+  #else:
+    #print "No se encuentra " +'\"'+ nomcampo +'\"'+ '\t\t' + ruta
+    #par.extend([''])
+  #return par
 
 
 def TratamientoFecha2(nomcampo,valcampo):
@@ -323,37 +317,38 @@ def FechaDelNombre2():
   return fechamontada
 
 
-def FechaDelNombre(par):
-  import re
-  rutaseg = ruta.split('/')
-  for i in rutaseg:
-    if re.search('[0-9]{8}',i):
-      fecharuta = re.search('[0-9]{8}',i).group(0)
-      par[0] = fecharuta[0:4] + "-" + fecharuta[4:6] + "-" + fecharuta[6:8]
-      break
-    elif re.search('[0-9]{6}',i):
-      fecharuta = re.search('[0-9]{6}',i).group(0)
-      par[0] = "20" + fecharuta[0:2] + "-" + fecharuta[2:4] + "-" + fecharuta[4:6]
-      break
-  return par
+# EN DESUSO
+#def FechaDelNombre(par):
+  #import re
+  #rutaseg = ruta.split('/')
+  #for i in rutaseg:
+    #if re.search('[0-9]{8}',i):
+      #fecharuta = re.search('[0-9]{8}',i).group(0)
+      #par[0] = fecharuta[0:4] + "-" + fecharuta[4:6] + "-" + fecharuta[6:8]
+      #break
+    #elif re.search('[0-9]{6}',i):
+      #fecharuta = re.search('[0-9]{6}',i).group(0)
+      #par[0] = "20" + fecharuta[0:2] + "-" + fecharuta[2:4] + "-" + fecharuta[4:6]
+      #break
+  #return par
 
 
-
-def BuscaFyT(cabecera,listaCampos):
-  CamposFecha = ['DATE-OBS','DATE-AVG','JD','JUL-DATE','JUL_DATE','JD-HELIO','JD_HELIO','DATE_OBS','DATE','SID-TIME','SID_TIME','MJD','MJD-OBS','MNT_INFO','OPENTIME','READTIME','ST','STSTART','TIME''TIME-END','TIME_END','TM_START','TM-START','UNI-TIME','UNI_TIME','USEC','UT','UTC','UT_END','UT-END','UTOBS','UT_START','CLOSTIME','CTIME','DARKTIME','ELAPSED','EXPOSED','EXP_ID','EXPSTART','LST','SIMPLE']
-  par = ['0','0','0']
-  for i in CamposFecha:
-    if i in (s.rstrip(' ') for s in listaCampos):
-      if i != "SIMPLE":
-	par = TratamientoFecha(i,cabecera[i].rstrip(' '),cabecera.comments[i]) # par es una lista de 3 componentes
-	if par[1] == '0':
-	  par[1] = BuscaHora(cabecera,listaCampos)
-	par[2] = TiempoExp(cabecera, listaCampos)
-	break
-      else:
-	break
-  par = FechaDelNombre(par)
-  return par
+# EN DESUSO
+#def BuscaFyT(cabecera,listaCampos): 
+  #CamposFecha = ['DATE-OBS','DATE-AVG','JD','JUL-DATE','JUL_DATE','JD-HELIO','JD_HELIO','DATE_OBS','DATE','SID-TIME','SID_TIME','MJD','MJD-OBS','MNT_INFO','OPENTIME','READTIME','ST','STSTART','TIME''TIME-END','TIME_END','TM_START','TM-START','UNI-TIME','UNI_TIME','USEC','UT','UTC','UT_END','UT-END','UTOBS','UT_START','CLOSTIME','CTIME','DARKTIME','ELAPSED','EXPOSED','EXP_ID','EXPSTART','LST','SIMPLE']
+  #par = ['0','0','0']
+  #for i in CamposFecha:
+    #if i in (s.rstrip(' ') for s in listaCampos):
+      #if i != "SIMPLE":
+	#par = TratamientoFecha(i,cabecera[i].rstrip(' '),cabecera.comments[i]) # par es una lista de 3 componentes
+	#if par[1] == '0':
+	  #par[1] = BuscaHora(cabecera,listaCampos)
+	#par[2] = TiempoExp(cabecera, listaCampos)
+	#break
+      #else:
+	#break
+  #par = FechaDelNombre(par)
+  #return par
 
 
 
