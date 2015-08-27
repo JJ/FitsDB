@@ -648,7 +648,7 @@ for (path, ficheros, archivos) in walk (directorio_imagenes):
         pass
       else:
         GetData(ruta)
-        nuevo += 1
+        nuevos += 1
       rev += 1
 
 
