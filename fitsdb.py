@@ -62,15 +62,6 @@ def ErrorMuchosArg():
   print " "
 
 
-# EN DESUSO
-#def CheckFileExistence(nombrearchivo):
-  #if os.path.exists(nombrearchivo):
-    #return 1
-  #elif not os.path.exists(nombrearchivo):
-    #file(nombrearchivo, 'w').close()
-    #return 0
-
-
 def CheckConfFile():
   global config
   import ConfigParser
@@ -83,26 +74,6 @@ def CheckConfFile():
     #shutil.copy("/usr/local/etc/fitsdb.d/fitsdb.cfg.new","/usr/local/etc/fitsdb.d/fitsdb.cfg")
     Error1()
     sys.exit()
-
-
-# EN DESUSO
-#def AddCampos(url, salida): # En desuso
-  #listaDatos = pyfits.open(url)
-  #listaCamposNuevos = listaDatos[0].header.keys()
-  #if CheckFileExistence(salida):
-    #fileCampos = open(salida, 'r')
-    #listaCampos = fileCampos.read().splitlines()
-    #for strCampoNuevo in listaCamposNuevos:
-      #if strCampoNuevo not in (s.rstrip(' ') for s in listaCampos):
-	#fileCampos = open(salida, 'a')
-	#fileCampos.write(strCampoNuevo + ' \n')
-  #else:
-    #for strCampoNuevo in listaCamposNuevos:
-      #fileCampos = open(salida, 'a')
-      #fileCampos.write(strCampoNuevo + ' \n')
-  #fileCampos.close()
-  #listaDatos.close()
-
 
 
 def HashFile(ruta):
@@ -118,7 +89,7 @@ def HashFile(ruta):
 
 
 
-def JD2Date(entrada): # En desuso
+def JD2Date(entrada): # En desuso pero potencialmente útil
   from astropy.time import Time
   dato = float(entrada)
   dia = int(dato)
@@ -130,7 +101,7 @@ def JD2Date(entrada): # En desuso
   return par
 
 
-def JD2Date2(entrada): # En desuso
+def JD2Date2(entrada): # En desuso pero potencialmente útil
   from astropy.time import Time
   arrayFechaJbruta = ['0','0']
   dato = float(entrada)
@@ -143,7 +114,7 @@ def JD2Date2(entrada): # En desuso
   return arrayFechaJbruta[0],arrayFechaJbruta[1]
 
 
-def MJD2Date(entrada): # En desuso
+def MJD2Date(entrada): # En desuso pero potencialmente útil
   from astropy.time import Time
   dato = float(entrada)
   dia = int(dato)
@@ -155,7 +126,7 @@ def MJD2Date(entrada): # En desuso
   return par
 
 
-def MJD2Date2(entrada): # En desuso
+def MJD2Date2(entrada): # En desuso pero potencialmente útil
   from astropy.time import Time
   dato = float(entrada)
   dia = int(dato)
@@ -166,23 +137,11 @@ def MJD2Date2(entrada): # En desuso
   par[1] = t.iso.split(' ')[1].replace('-',':')
   return par
 
-
-# EN DESUSO
-#def FormatoFecha(cadena):
-  #if 'T' in cadena:
-    #par = cadena.split("T")
-    #par[0] = par[0].replace('/','-')
-    #par[1] = par[1].replace('-',':')
-  #else:
-    #par = [cadena.replace('/','-'),'']
-  #return par
- 
 
 def FormatoFecha2(fechabruta):
   if 'T' in fechabruta:
     arrayFechabruta = fechabruta.split("T")
     import re
-    #arrayFechabruta[0] = arrayFechabruta[0].replace('/','-')
     arrayFechabruta[0] = re.search('[0-9]{4}-[0-9]{2}-[0-9]{2}',arrayFechabruta[0].replace('/','-')).group(0)
     arrayFechabruta[1] = arrayFechabruta[1].replace('-',':')
   else:
@@ -204,26 +163,13 @@ def BuscaCosasEnCadena(cadena,arraycosas):
 
 
 def TiempoExp(cabecera,listaCampos):
-  #CamposExp= ['EXPOSURE','EXPTIME']
   if "EXPOSURE" in listaCampos:
     return str(cabecera['EXPOSURE']).lstrip(' ')
   elif "EXPTIME" in listaCampos:
     return str(cabecera['EXPTIME']).lstrip(' ')
   else:
     return '0'
-    #print "No se encuentra el tiempo de exposición."
     
-    
-# EN DESUSO
-#def BuscaHora(cabecera, listaCampos):
-  #CamposHora=['TIME-OBS','TIME_OBS','UTSTART','UT','EXPSTART','TIME-INI']
-  #for i in CamposHora:
-    #if i in (s.rstrip(' ') for s in listaCampos):
-      #if cabecera[i] != '':
-	#return cabecera[i].rstrip(' ')
-	#break
-  #return 'UNK'
-
 
 def BuscaHora2(cabecera, listaCampos):
   CamposHora=['TIME-OBS','TIME_OBS','UTSTART','UT','EXPSTART','TIME-INI','SIMPLE']
@@ -247,40 +193,6 @@ def BuscaHora2(cabecera, listaCampos):
           break
       else:
         return '0'
-
-
-# EN DESUSO
-#def TratamientoFecha(nomcampo,valcampo,comcampo): # Recibe los comentarios como argumento porque a veces hay info útil
-  #if nomcampo == "DATE-OBS":
-    #par = FormatoFecha(valcampo)
-    #par.extend([''])
-  #elif nomcampo == "DATE_OBS":
-    #par = FormatoFecha(valcampo)
-    #par.extend([''])
-  #elif nomcampo == "DATE-AVG":
-    #par = FormatoFecha(valcampo)
-    #par.extend([''])
-    #par.extend(['0']) # No hay que +/- T.exposición
-  #elif nomcampo == "DATE":
-    #par = FormatoFecha(valcampo)
-    #par.extend([''])
-  #elif nomcampo == "JD":
-    #par = JD2Date(str(valcampo))
-    #par.extend([''])
-  #elif nomcampo == "JUL-DATE":
-    #par = JD2Date(str(valcampo))
-    #par.extend([''])
-  #elif nomcampo == "JUL_DATE":
-    #par = JD2Date(str(valcampo))
-    #par.extend([''])
-  #elif nomcampo == "JD-HELIO":
-    #par.extend(['0']) # No hay que +/- T.exposición
-  #elif nomcampo == "JD_HELIO":
-    #par.extend(['0']) # No hay que +/- T.exposición
-  #else:
-    #print "No se encuentra " +'\"'+ nomcampo +'\"'+ '\t\t' + ruta
-    #par.extend([''])
-  #return par
 
 
 def TratamientoFecha2(nomcampo,valcampo):
@@ -317,41 +229,6 @@ def FechaDelNombre2():
   return fechamontada
 
 
-# EN DESUSO
-#def FechaDelNombre(par):
-  #import re
-  #rutaseg = ruta.split('/')
-  #for i in rutaseg:
-    #if re.search('[0-9]{8}',i):
-      #fecharuta = re.search('[0-9]{8}',i).group(0)
-      #par[0] = fecharuta[0:4] + "-" + fecharuta[4:6] + "-" + fecharuta[6:8]
-      #break
-    #elif re.search('[0-9]{6}',i):
-      #fecharuta = re.search('[0-9]{6}',i).group(0)
-      #par[0] = "20" + fecharuta[0:2] + "-" + fecharuta[2:4] + "-" + fecharuta[4:6]
-      #break
-  #return par
-
-
-# EN DESUSO
-#def BuscaFyT(cabecera,listaCampos): 
-  #CamposFecha = ['DATE-OBS','DATE-AVG','JD','JUL-DATE','JUL_DATE','JD-HELIO','JD_HELIO','DATE_OBS','DATE','SID-TIME','SID_TIME','MJD','MJD-OBS','MNT_INFO','OPENTIME','READTIME','ST','STSTART','TIME''TIME-END','TIME_END','TM_START','TM-START','UNI-TIME','UNI_TIME','USEC','UT','UTC','UT_END','UT-END','UTOBS','UT_START','CLOSTIME','CTIME','DARKTIME','ELAPSED','EXPOSED','EXP_ID','EXPSTART','LST','SIMPLE']
-  #par = ['0','0','0']
-  #for i in CamposFecha:
-    #if i in (s.rstrip(' ') for s in listaCampos):
-      #if i != "SIMPLE":
-	#par = TratamientoFecha(i,cabecera[i].rstrip(' '),cabecera.comments[i]) # par es una lista de 3 componentes
-	#if par[1] == '0':
-	  #par[1] = BuscaHora(cabecera,listaCampos)
-	#par[2] = TiempoExp(cabecera, listaCampos)
-	#break
-      #else:
-	#break
-  #par = FechaDelNombre(par)
-  #return par
-
-
-
 def BuscaFyT2(cabecera,listaCampos):
   CamposFecha = ['DATE-OBS','DATE-AVG','JD','JUL-DATE','JUL_DATE','SIMPLE']
   trio = ['0','0','0']
@@ -362,8 +239,6 @@ def BuscaFyT2(cabecera,listaCampos):
           trio[0],trio[1] = TratamientoFecha2(i,cabecera[i].rstrip(' '))
           if trio[1] == '0':
             trio[1] = BuscaHora2(cabecera,listaCampos)
-            #print "--------------------------------------------------> Depurando!      ##     " + trio[1]
-            
           trio[2] = TiempoExp(cabecera, listaCampos)
           break
       else:
@@ -459,8 +334,6 @@ def BuscaFilter(cabecera,listaCampos):
 	return cabecera[i]
 
 	break
-  #print ruta
-  #print listaCampos
   return 'UNK'
 
 #--------------------------
@@ -505,7 +378,6 @@ def IniciarDB():
         db = MySQLdb.connect(host=varHost,user=varUser,passwd=varPass,db=varDBName)
         global cur
         cur = db.cursor()
-        #cur.execute("SHOW TABLES")
         CrearTablaObs()
         logging.info('Conexión a la base de datos realizada con éxito.')
       except:
@@ -544,8 +416,7 @@ def CheckDB2(ruta):
 
 def BloquePrincipal(url,suma,fuente):
     listaCampos = fuente[0].header.keys()
-    cabecera = fuente[0].header    
-    #par = BuscaFyT(cabecera, listaCampos)
+    cabecera = fuente[0].header
     par = ['0','0','0']
     par[0],par[1],par[2] = BuscaFyT2(cabecera,listaCampos)
     Instr = BuscaInstr(cabecera,listaCampos)
@@ -567,9 +438,7 @@ def BloquePrincipal(url,suma,fuente):
       
     Object,ImgType = BuscaObjYType(cabecera,listaCampos)
     Filter = BuscaFilter(cabecera, listaCampos)
-
     try:
-      
       cur.execute("""INSERT INTO tablaobs VALUES ('NULL',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(datetime.utcnow(),suma,ImgType,Object,par[0],par[1],par[2],Observatorio,Telescopio,Instr,Filter,os.path.abspath(url)))
       db.commit()
     except:
@@ -582,7 +451,9 @@ def BloquePrincipal(url,suma,fuente):
     
 def GetData(url):
   import pyfits
-  #hdu.verify('silentfix')
+  # Estas dos lineas se quedan aquí por si se desea implementar la verificación por suma en vez de por localización.
+  #suma = HashFile(url)
+  suma = ''
   try:
     fuente = pyfits.open(url)
     BloquePrincipal(url,suma,fuente)
@@ -591,16 +462,14 @@ def GetData(url):
     try:
       fuente.verify('silentfix')
       fuente = pyfits.open(url)
-      logging.info('Archivo reparado con éxito.')
       BloquePrincipal(url,suma,fuente)
+      logging.info('Archivo reparado con éxito.')
     except:
       logging.info('Error. No se pudo reparar la cabecera. El archivo %s no ha sido incluido en la base de datos.',url)
       print "---> Error al abrir " + url
       pass
 
-    
-
-
+# --------------------------------------------- CUERPO DEL PROGRAMA ---------------------------------------------
 
 if len(sys.argv) == 2:
   directorio_imagenes = sys.argv[1]
@@ -614,7 +483,6 @@ elif len(sys.argv) == 1:
 IniciarLogging()
 logging.info('Iniciando FitsDB...')
 IniciarDB()
-#archivo_nombres_campos = "nombres_de_campos"
 
 rev = 0
 nuevos = 0
@@ -643,7 +511,6 @@ for (path, ficheros, archivos) in walk (directorio_imagenes):
     if archivo.endswith(".fits") or archivo.endswith(".fit") or archivo.endswith(".fts"):
       ruta = path + '/' + archivo
       ruta = ruta.replace('//','/')
-      #AddCampos(ruta, archivo_nombres_campos) # En desuso. Para listar todos los campos existentes
       if CheckDB2(ruta):
         pass
       else:
@@ -652,9 +519,9 @@ for (path, ficheros, archivos) in walk (directorio_imagenes):
       rev += 1
 
 
-msgfin = "Se han procesado " + str(rev) + " archivos.\n Se han incluido "+str(nuevos)+" archivos a la base de datos.", "green"
+msgfin = "Se han procesado " + str(rev) + " archivos.\nSe han incluido "+str(nuevos)+" archivos a la base de datos."
 logging.info('Se han procesado %s archivos. %s de ellos son nuevos.', str(rev), str(nuevos))
 logging.info('Fin del escaneo. Se cierra Fitsdb.\n\n')
 from termcolor import colored
-print "Fin: " + str(datetime.utcnow())
+print "\n\nFin: " + str(datetime.utcnow())
 print colored (msgfin, "green")
