@@ -74,11 +74,11 @@ def ErrorMuchosArg():
 def CheckConfFile():
   global config
   import ConfigParser
-  if os.path.exists("/usr/local/etc/fitsdb.d/fitsdb.cfg"):
+  if os.path.exists("fitsdb.cfg"):
     config = ConfigParser.RawConfigParser()
-    config.read('/usr/local/etc/fitsdb.d/fitsdb.cfg')
+    config.read('fitsdb.cfg')
     return 1
-  elif not os.path.exists("/usr/local/etc/fitsdb.d/fitsdb.cfg"):
+  elif not os.path.exists("fitsdb.cfg"):
     #import shutil
     #shutil.copy("/usr/local/etc/fitsdb.d/fitsdb.cfg.new","/usr/local/etc/fitsdb.d/fitsdb.cfg")
     Error1()
