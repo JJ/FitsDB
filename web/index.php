@@ -8,11 +8,12 @@ FitsDB v0.1.1-1
 <div id='main'>
 <?php
 set_time_limit(0);
-define('DEBUG', false);
+define('DEBUG', true);
 // session_start();
 //error_reporting(E_ALL);
 //ini_set('display_errors', true);
 limpieza('descargas/');
+tablanombres();
 // limpieza('sesion/');
 
 
@@ -54,7 +55,7 @@ function cambiar(){
 
 <H1 align=center>Interfaz web de FitsDB</H1>
 
-<form id="form1" name="form1" method="post" action="index.php" align="right">
+<form id="form1" name="form1" method="post" action="index2.php" align="right">
   <table width="900" border="0" align="center">
   <tr>
     <td>Nombre del objeto:</td>
@@ -219,11 +220,19 @@ function cambiar(){
 	?>
 	<datalist id="listaobservatorio">
 	<?php
-	$arrayobservatorio = array('OSN','DSAZ','CGG','Teide','Atacama','IAC','la hita','lapalma');
-	natsort($arrayobservatorio);
-	foreach($arrayobservatorio as $i){
-	  echo "<option value='".$i."'>".$i."</option>";
-	}
+	$conexion = conectarDB();
+        $rsqlo = $conexion->query("SELECT observatory FROM tablaobs GROUP BY observatory");
+        $rsqlo -> data_seek(0);
+	while ($fila = $rsqlo->fetch_assoc()){
+          $filabuena = array_values($fila);
+          $num = count($filabuena);
+          echo "<option value='".$filabuena[0]."'>".$filabuena[0]."</option>";
+        }
+	//$arrayobservatorio = array('OSN','DSAZ','CGG','Teide','Atacama','IAC','la hita','lapalma');
+	//natsort($arrayobservatorio);
+	//foreach($arrayobservatorio as $i){
+	//  echo "<option value='".$i."'>".$i."</option>";
+	//}
 	?>
 	</datalist>
     </td>
@@ -274,6 +283,7 @@ function cambiar(){
 <?php
 
 
+
 $prefijo = "SELECT id, object, telescope, instrument, dateobs, timeobs, filter, imgtype, exptime, observatory, rute FROM tablaobs";
 $sufijo = '';
 
@@ -286,9 +296,23 @@ if (strlen($typeimg) != 0) {
   $sufijo = $sufijo . sprintf(" imgtype like '%%%s%%'",$typeimg) . " and";
   }
 
-if (strlen($nombre_obj) != 0) {
-  $nombre_obj = str_replace(' ', '', $nombre_obj);
-  $sufijo = $sufijo . sprintf(" object like '%%%s%%'",$nombre_obj) . " and";
+$arraynombres = masnombres($nombre_obj);
+if ((strlen($arraynombres[0]) > 0) or (strlen($arraynombres[1]) > 0) or (strlen($arraynombres[2]) > 0)) {
+  $arraynombres[] = str_replace(' ', '', $arraynombres[0]);
+  $m = count($arraynombres);
+//   echo "<p>".$m."</p>";
+  $sufijo = $sufijo . " (";
+  for ($j=0; $j<$m; $j++)
+  {
+    if (strlen($arraynombres[$j]) > 0)
+    {
+      $sufijo = $sufijo . sprintf(" object like '%%%s%%' or",$arraynombres[$j]);
+      $sufijo = $sufijo . sprintf(" rute like '%%%s%%' or",$arraynombres[$j]);
+    }
+  }
+  $fin = preg_replace('/or$/','',$sufijo);
+  $sufijo = $fin .")". " and";
+//   echo "<p>". $sufijo . "</p>";
   }
 
 if ((strlen($fecha_obs1) != 0) && (strlen($fecha_obs2) != 0)) {
@@ -316,9 +340,9 @@ if (strlen($filtro) != 0) {
 $sufijo = $sufijo . sprintf(" filter like '%%%s%%'",$filtro);
 }
 
-if ((strlen($idnum) != 0) || (strlen($typeimg) != 0) || (strlen($nombre_obj) != 0) || (strlen($fecha_obs1) != 0) || (strlen($fecha_obs2) != 0) ||(strlen($exptime1) != 0) ||(strlen($exptime2) != 0) || (strlen($observatorio) != 0) || (strlen($telescopio) != 0) || (strlen($instrumento) != 0) || (strlen($filtro) != 0)) {
+if ((strlen($idnum) != 0) || (strlen($typeimg) != 0) || (strlen($arraynombres[0]) != 0) || (strlen($fecha_obs1) != 0) || (strlen($fecha_obs2) != 0) ||(strlen($exptime1) != 0) ||(strlen($exptime2) != 0) || (strlen($observatorio) != 0) || (strlen($telescopio) != 0) || (strlen($instrumento) != 0) || (strlen($filtro) != 0)) {
   $montamos = $prefijo . " WHERE" . $sufijo;
-  $peticion = preg_replace('/and$/', '', $montamos) . " ORDER BY dateobs DESC";
+  $peticion = preg_replace('/and$/', '', $montamos);
 //   echo "<table width='500' align='left'><tr><td>Se muestra la siguiente petición:</td><td> </td></tr>";
 //   echo "<tr><td>Nombre del objeto:</td><td>" . $nombre_obj . "</td></tr>";
 //   echo "<tr><td>Telescopio:</td><td>" . $telescopio . "</td></tr>";
@@ -332,7 +356,8 @@ if ((strlen($idnum) != 0) || (strlen($typeimg) != 0) || (strlen($nombre_obj) != 
 //   echo "</table>";
 //   echo "<br>";
 
-echo "Se muestran los resultados de su consulta. Primero los más nuevos.";
+echo "Se muestran los resultados de su consulta.";
+// echo "<p>".$peticion."</p>";
   }
 else {
   $peticion = "SELECT id, object, telescope, instrument, dateobs, timeobs, filter, imgtype, exptime, observatory, rute FROM tablaobs WHERE DATE_SUB(CURDATE(), INTERVAL 31 DAY) <= dateobs ORDER BY dateobs DESC";
@@ -341,18 +366,15 @@ else {
 
   
 
-$config = parse_ini_file("/usr/local/etc/fitsdb.d/fitsdb.cfg",true);
-$mysql_user = $config['mysql']['user'];
-$mysql_pass = $config['mysql']['pass'];
-$mysql_dbname = $config['mysql']['dbname'];
-$mysql_hostname = $config['mysql']['hostname'];
+// $config = parse_ini_file("/etc/fitsdb.d/fitsdb.cfg",true);
 
 
-// $conexion = new mysqli("127.0.0.1", "pablo", "halconmilenario", "pruebasdb");
-$conexion = new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
+$conexion = conectarDB();
 $resultado = $conexion->query($peticion);
 $resultado -> data_seek(0);
 $archivos = array();
+
+
 ?>
 <form id="form2" name="form2" method="post" action="download.php" align="right">
 <input type="submit" class ="button" name="descargazip" value="Descargar archivos comprimidos" />
@@ -471,7 +493,7 @@ function limpieza($path)
         {
             limpieza(realpath($path) . '/' . $file);
         }
-//         return rmdir($path); // Para borrar el propio directorio que recibe como argumento
+        return rmdir($path);
     }
     else if (is_file($path) === true)
     {
@@ -479,6 +501,96 @@ function limpieza($path)
     }
     return false;
 }
+
+function conectarDB(){
+$config = parse_ini_file("/usr/local/etc/fitsdb.d/fitsdb.cfg",true);
+$mysql_user = $config['mysql']['user'];
+$mysql_pass = $config['mysql']['pass'];
+$mysql_dbname = $config['mysql']['dbname'];
+$mysql_hostname = $config['mysql']['hostname'];
+
+
+// global $conexion;
+// $conexion = new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
+return new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
+}
+
+function masnombres($nomobj)
+{
+  if (strlen($nomobj) > 1){
+    if (preg_match('/[0-9]{4}[A-Za-z]{2}[0-9]*/',$nomobj)) // Esto reescribe el nombre código bien, con el espacio después del año
+    {
+      preg_match('/^[0-9]{4}/',$nomobj,$cifra);
+      $nomobj = preg_replace('/^[0-9]{4}/',$cifra[0].' ',$nomobj);
+    }
+    // Consultar $nomobj en nombresobjetos
+    $array = consultanombreenbd($nomobj);
+//     print_r($array);
+    if (!(strlen($array[0]) > 1))
+    {
+      $nomobj = strtoupper($nomobj);
+      echo "<p>Consulta de nombres en JPL Horizons.</p>";
+      $url = 'http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND=%27' . urlencode($nomobj) . '%27&MAKE_EPHEM=%27no%27';
+      $r = file_get_contents($url);
+      preg_match("/[0-9]*\s\w*\s\([0-9]{4}\s\w*/",$r,$bingo);
+      $paso1= explode(' (',$bingo[0]);
+      $arraytemp = explode(' ',$paso1[0]);
+      $arraytemp[] = $paso1[1];
+      $arraytemp[] = str_replace(' ','',$paso1[1]); // Aquí ya tiene todos los nombres listos para consultar tablaobs.
+      $array[0] = $arraytemp[2];
+      $array[1] = $arraytemp[0];
+      $array[2] = $arraytemp[1];
+//       print_r($array);
+  //     Introducimos los datos en la base de datos
+      if (strlen($array[0]) > 2){
+        nombresadb($array[0],$array[1],$array[2]);
+//         print_r($array);
+      }
+      else{
+        $array[0] = $nomobj;
+      }
+    }
+    else{
+    echo "<p>Consulta de nombres en local.</p>";
+    }
+    // Aquí ya podemos devolver los nombres a buscar
+}
+// print_r($array);
+return $array;
+}
+
+function nombresadb($codigo,$numerico,$nombrestd)
+{
+    $conexion = conectarDB();
+    $peticion = "INSERT INTO nombresobjetos VALUES ('".$codigo."','".$numerico."','".$nombrestd."')";
+//     if (!mysql_query($conexion, $peticion)){
+    if (!$conexion ->query($peticion)){
+//     echo "<p> No envia a la DB. </p>";
+    }
+}
+
+function tablanombres()
+{
+$conexion = conectarDB();
+  $rsql = $conexion->query("CREATE TABLE IF NOT EXISTS nombresobjetos (codigo varchar(15) UNIQUE NOT NULL, numerico varchar(15) UNIQUE, nombre varchar(50))");
+}
+
+function consultanombreenbd($nombreconsulta)
+{
+  $conexion = conectarDB();
+  $rsql = $conexion->query("SELECT * FROM nombresobjetos WHERE codigo like '%%".$nombreconsulta."%%' OR numerico like '%%".$nombreconsulta."%%' OR nombre like '%%".$nombreconsulta."%%'");
+  $rsql -> data_seek(0);
+  $fila = $rsql->fetch_assoc();
+  if (count($fila) >0){
+    $filabuena = array_values($fila);
+  }
+  else{
+  $filabuena=array('','','');
+  }
+  return $filabuena;
+}
+
+
 ?>
 
 
