@@ -30,7 +30,7 @@ def Error1():
 
 def ErrorNoArg():
   from termcolor import colored
-  logging.info('Faltan argumentos! No se ejecutó el escaneo.')
+  milog.info('Faltan argumentos! No se ejecutó el escaneo.')
   print colored ("¡ERROR!", "red")
   print "Para que el programa funcione correctamente tiene que añadirle un argumento."
   print "A continuación se muestra un ejemplo:"
@@ -46,7 +46,7 @@ def ErrorNoArg():
 
 def ErrorMuchosArg():
   from termcolor import colored
-  logging.info('Demasiados argumentos! No se ejecutó el escaneo.')
+  milog.info('Demasiados argumentos! No se ejecutó el escaneo.')
   print colored ("¡ERROR!", "red")
   print "Solo se admite un único argumento: un directorio que contenga las imagenes"
   print "del tipo .fits, .fit y/o .fts"
@@ -358,7 +358,7 @@ def CrearTablaObs():
     cur.execute("SET NAMES 'utf8'")
     cur.execute("SET CHARACTER SET utf8")
   except:
-    logging.info('No se pudo crear la tabla \'tablaobs\' en la base de datos.')
+    milog.info('No se pudo crear la tabla \'tablaobs\' en la base de datos.')
 
 
 def IniciarDB():
@@ -370,7 +370,7 @@ def IniciarDB():
     varHost = config.get('mysql', 'hostname')
     if (varUser == "") or (varPass == "") or (varDBName == "") or (varHost == ""):
       print Error1()
-      logging.info('Faltan datos para conectar con la base de datos. Comprobar archivo de configuración.')
+      milog.info('Faltan datos para conectar con la base de datos. Comprobar archivo de configuración.')
       sys.exit()
     else:
       try:
@@ -379,17 +379,21 @@ def IniciarDB():
         global cur
         cur = db.cursor()
         CrearTablaObs()
-        logging.info('Conexión a la base de datos realizada con éxito.')
+        milog.info('Conexión a la base de datos realizada con éxito.')
       except:
-        logging.info('Error al conectar con la base de datos.')
+        milog.info('Error al conectar con la base de datos.')
 
 
 def IniciarLogging():
   import logging
-  if CheckConfFile():
-    LOG_FILENAME = config.get('log', 'path') + 'fitsdb.log'
-    global logging
-    logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO,format='%(asctime)s %(levelname)s %(message)s')
+  from logging.handlers import RotatingFileHandler
+  global milog
+  milog = logging.getLogger('main')
+  milog.setLevel(20)     # Es lo mismo que la linea anterior
+  logrot = RotatingFileHandler('logging.log',maxBytes=300,backupCount=4)
+  milog.addHandler(logrot)
+  formato = logging.Formatter('%(asctime)s -  %(message)s')
+  logrot.setFormatter(formato)
     
 
 
@@ -442,7 +446,7 @@ def BloquePrincipal(url,suma,fuente):
       cur.execute("""INSERT INTO tablaobs VALUES ('NULL',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(datetime.utcnow(),suma,ImgType,Object,par[0],par[1],par[2],Observatorio,Telescopio,Instr,Filter,os.path.abspath(url)))
       db.commit()
     except:
-      logging.info('Error al escribir en la base de datos la información de %s.',url)
+      milog.info('Error al escribir en la base de datos la información de %s.',url)
       print "---> No se ha podido introducir los datos del archivo: " + url
       pass
 
@@ -458,14 +462,14 @@ def GetData(url):
     fuente = pyfits.open(url)
     BloquePrincipal(url,suma,fuente)
   except:
-    logging.info('Error al abrir %s. Intentando reparar la cabecera...',url)
+    milog.info('Error al abrir %s. Intentando reparar la cabecera...',url)
     try:
       fuente.verify('silentfix')
       fuente = pyfits.open(url)
       BloquePrincipal(url,suma,fuente)
-      logging.info('Archivo reparado con éxito.')
+      milog.info('Archivo reparado con éxito.')
     except:
-      logging.info('Error. No se pudo reparar la cabecera. El archivo %s no ha sido incluido en la base de datos.',url)
+      milog.info('Error. No se pudo reparar la cabecera. El archivo %s no ha sido incluido en la base de datos.',url)
       print "---> Error al abrir " + url
       pass
 
@@ -481,31 +485,31 @@ elif len(sys.argv) == 1:
   sys.exit()
 
 IniciarLogging()
-logging.info('Iniciando FitsDB...')
+milog.info('Iniciando FitsDB...')
 IniciarDB()
 
 rev = 0
 nuevos = 0
 
-logging.info('Iniciando barrido en busca de archivos zip.')
+milog.info('Iniciando barrido en busca de archivos zip.')
 for (path, ficheros, archivos) in walk (directorio_imagenes):
   for archivo in archivos:
     if archivo.endswith(".zip"):
       import zipfile
       ruta = path + '/' + archivo
       ruta = ruta.replace('//','/')
-      logging.info('Zip encontrado! Iniciando descompresión.')
+      milog.info('Zip encontrado! Iniciando descompresión.')
       sitio = path + '/' + archivo.strip('.zip')
       try:
         zipfile.ZipFile(ruta).extractall(sitio)
         os.remove(ruta)
-        logging.info('Zip descomprimido con éxito.')
+        milog.info('Zip descomprimido con éxito.')
       except:
-        logging.info('Error al descomprimir el archivo Zip %s.',ruta)
-logging.info('Finalizado el barrido en busca de archivos Zip.')
+        milog.info('Error al descomprimir el archivo Zip %s.',ruta)
+milog.info('Finalizado el barrido en busca de archivos Zip.')
 
 
-logging.info('Iniciando barrido en busca de archivos fit/fits.')
+milog.info('Iniciando barrido en busca de archivos fit/fits.')
 for (path, ficheros, archivos) in walk (directorio_imagenes):
   for archivo in archivos:
     if archivo.endswith(".fits") or archivo.endswith(".fit") or archivo.endswith(".fts"):
@@ -520,8 +524,8 @@ for (path, ficheros, archivos) in walk (directorio_imagenes):
 
 
 msgfin = "Se han procesado " + str(rev) + " archivos.\nSe han incluido "+str(nuevos)+" archivos a la base de datos."
-logging.info('Se han procesado %s archivos. %s de ellos son nuevos.', str(rev), str(nuevos))
-logging.info('Fin del escaneo. Se cierra Fitsdb.\n\n')
+milog.info('Se han procesado %s archivos. %s de ellos son nuevos.', str(rev), str(nuevos))
+milog.info('Fin del escaneo. Se cierra Fitsdb.\n\n')
 from termcolor import colored
 print "\n\nFin: " + str(datetime.utcnow())
 print colored (msgfin, "green")
