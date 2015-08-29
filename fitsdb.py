@@ -390,7 +390,7 @@ def IniciarLogging():
   global milog
   milog = logging.getLogger('main')
   milog.setLevel(20)     # Es lo mismo que la linea anterior
-  logrot = RotatingFileHandler('logging.log',maxBytes=300,backupCount=4)
+  logrot = RotatingFileHandler('logging.log',maxBytes=1048576,backupCount=4)
   milog.addHandler(logrot)
   formato = logging.Formatter('%(asctime)s -  %(message)s')
   logrot.setFormatter(formato)
