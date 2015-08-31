@@ -65,11 +65,11 @@ def ErrorMuchosArg(): # REVISAR
 def CheckConfFile():
   global config
   import ConfigParser
-  if os.path.exists("fitsdb.cfg"):
+  if os.path.exists("config.cfg"):
     config = ConfigParser.RawConfigParser()
-    config.read('fitsdb.cfg')
+    config.read('config.cfg')
     return 1
-  elif not os.path.exists("fitsdb.cfg"):
+  else:
     #import shutil
     #shutil.copy("/usr/local/etc/fitsdb.d/fitsdb.cfg.new","/usr/local/etc/fitsdb.d/fitsdb.cfg")
     Error1()
@@ -275,7 +275,7 @@ def BuscaObservatorio(cabecera,listaCampos):
   for i in CamposObservatorio:
     if i in (s.rstrip(' ') for s in listaCampos):
       if cabecera[i] != '':
-	salida = cabecera[i].replace('stron?mico','stronómico')
+	salida = cabecera[i].replace('stron?mico','stronomico')
 	return salida
 	break
   return salida
@@ -339,8 +339,10 @@ def BuscaFilter(cabecera,listaCampos):
 #--------------------------
 
 
-def CrearTablaObs():
-  if not cur.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='tablaobs").fetchall()[0][0]:
+def CrearTablaObsMysql():
+  milog.info('Comprobando que la tabla \'tablaobs\' existe.')
+  cur.execute("SELECT count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA = 'pruebasdb') AND (TABLE_NAME = 'tablaobs')")
+  if cur.fetchone()[0] != 1:
     milog.info('No se ha encontrado \'tablaobs\' en la base de datos. Se procede a crearla.')
     try:
       cur.execute("""CREATE TABLE IF NOT EXISTS tablaobs
@@ -359,9 +361,42 @@ def CrearTablaObs():
       rute VARCHAR(200) NOT NULL)""")
       cur.execute("SET NAMES 'utf8'")  # Comprobar que estos comandos valen para sqlite
       cur.execute("SET CHARACTER SET utf8")  # Comprobar que estos comandos valen para sqlite
+      cur.execute("SELECT count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA = 'pruebasdb') AND (TABLE_NAME = 'tablaobs')")
+      if cur.fetchone()[0] == '0L':
+        milog.info('No se pudo crear la tabla \'tablaobs\' en la base de datos.')
+      else:
+        milog.info('La tabla \'tablaobs\' se ha creado con éxito en la base de datos.')
+    except:
+      milog.info('No se pudo crear la tabla \'tablaobs\' en la base de datos.')
+  else:
+    milog.info('Se ha encontrado la tabla \'tablaobs\' en la base de datos.')
+      
+
+def CrearTablaObsSqlite():
+  milog.info('Comprobando que la tabla \'tablaobs\' existe.')
+  if not cur.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='tablaobs'").fetchall()[0][0]:
+    milog.info('No se ha encontrado \'tablaobs\' en la base de datos. Se procede a crearla.')
+    try:
+      cur.execute("""CREATE TABLE IF NOT EXISTS tablaobs
+      (id INTEGER UNIQUE PRIMARY KEY,
+      moddate TEXT,
+      md5sum TEXT,
+      imgtype TEXT,
+      object TEXT,
+      dateobs TEXT,
+      timeobs TEXT,
+      exptime INTEGER,
+      observatory TEXT,
+      telescope TEXT,
+      instrument TEXT,
+      filter TEXT,
+      rute TEXT NOT NULL)""")
+      #cur.execute("SET NAMES 'utf8'")  # Comprobar que estos comandos valen para sqlite
+      #cur.execute("SET CHARACTER SET utf8")  # Comprobar que estos comandos valen para sqlite
       milog.info('La tabla \'tablaobs\' se ha creado con éxito en la base de datos.')
     except:
       milog.info('No se pudo crear la tabla \'tablaobs\' en la base de datos.')
+      sys.exit()
 
 
 def IniciarDB():
@@ -381,7 +416,7 @@ def IniciarDB():
         db = MySQLdb.connect(host=varHost,user=varUser,passwd=varPass,db=varDBName)
         global cur
         cur = db.cursor()
-        CrearTablaObs()
+        CrearTablaObsMysql()
         milog.info('Conexión a la base de datos realizada con éxito.')
       except:
         milog.info('Error al conectar con la base de datos.')
@@ -389,20 +424,22 @@ def IniciarDB():
 
 def IniciarDB2():
   if CheckConfFile(): # Estaría bien implementar que todos los campos que tienen que estar definidos lo están.
-    tipoDB = config.get('general', 'basededatos') # Pasar todo a minúsculas
+    global tipoDB
+    tipoDB = config.get('general', 'basededatos').lower() # Pasar todo a minúsculas
+    global db
+    global cur
     if tipoDB == 'sqlite':
       import sqlite3
-      print 'sqlite'
       varDBName = config.get('sqlite','nombre')
       if varDBName == '':
         print Error1() # Revisar si este mensaje de error sigue valiendo para sqlite
         milog.info('Error en el archivo de configuración. La base de datos sqlite tiene que tener un nombre.')
         sys.exit()
       else:
-        global db
-        global cur
-        db = sqlite3.connect(nombre+'.db')
+        db = sqlite3.connect(varDBName+'.db')
         cur = db.cursor()
+        CrearTablaObsSqlite()
+        milog.info('Conexión a la base de datos realizada con éxito.')
     elif tipoDB == 'mysql':
       import MySQLdb
       varUser = config.get('mysql', 'user')
@@ -411,18 +448,17 @@ def IniciarDB2():
       varHost = config.get('mysql', 'hostname')
       if (varUser == "") or (varPass == "") or (varDBName == "") or (varHost == ""):
         print Error1()
-        milog.info('Faltan datos para conectar con la base de datos. Comprobar archivo de configuración.')
+        milog.info('Error en el archivo de configuración. Comprobar todos los datos de la base de datos mysql.')
         sys.exit()
       else:
         try:
-          global db
           db = MySQLdb.connect(host=varHost,user=varUser,passwd=varPass,db=varDBName)
-          global cur
           cur = db.cursor()
-          CrearTablaObs()
+          CrearTablaObsMysql()
           milog.info('Conexión a la base de datos realizada con éxito.')
         except:
           milog.info('Error al conectar con la base de datos.')
+          sys.exit()
     else:
       milog.info('Error de configuración. Revise que la base seleccionada sea sqlite o mysql.')
       sys.exit()
@@ -445,7 +481,7 @@ def IniciarLogging():
 
 
 def CheckDB(suma): # más que suma debe recibir la ruta del archivo como argumento
-  cur.execute('SELECT md5sum FROM tablaobs WHERE md5sum = %s',(suma,))
+  cur.execute('SELECT md5sum FROM tablaobs WHERE md5sum = ?',[suma])
   if cur.fetchone():
     return 1
   else:
@@ -453,7 +489,10 @@ def CheckDB(suma): # más que suma debe recibir la ruta del archivo como argumen
 
 
 def CheckDB2(ruta):
-  cur.execute('SELECT rute FROM tablaobs WHERE rute = %s',(os.path.abspath(ruta),))
+  if tipoDB == 'sqlite':
+    cur.execute('SELECT rute FROM tablaobs WHERE rute = ?',[os.path.abspath(ruta)])
+  elif tipoDB == 'mysql':
+    cur.execute('SELECT rute FROM tablaobs WHERE rute = %s',os.path.abspath(ruta))
   if cur.fetchone():
     return 1
   else:
@@ -489,11 +528,15 @@ def BloquePrincipal(url,suma,fuente):
     Object,ImgType = BuscaObjYType(cabecera,listaCampos)
     Filter = BuscaFilter(cabecera, listaCampos)
     try:
-      cur.execute("""INSERT INTO tablaobs VALUES ('NULL',%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(datetime.utcnow(),suma,ImgType,Object,par[0],par[1],par[2],Observatorio,Telescopio,Instr,Filter,os.path.abspath(url)))
+      if tipoDB == 'sqlite':
+        cur.execute("""INSERT INTO tablaobs VALUES (NULL,?,?,?,?,?,?,?,?,?,?,?,?)""",[str(datetime.utcnow()),suma,ImgType,Object,str(par[0]),str(par[1]),par[2],Observatorio,Telescopio,Instr,Filter,os.path.abspath(url)])
+      elif tipoDB == 'mysql':
+        cur.execute("""INSERT INTO tablaobs VALUES (NULL,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",(datetime.utcnow(),suma,ImgType,Object,par[0],par[1],par[2],Observatorio,Telescopio,Instr,Filter,os.path.abspath(url)))
       db.commit()
     except:
       milog.info('Error al escribir en la base de datos la información de %s.',url)
       print "---> No se ha podido introducir los datos del archivo: " + url
+      #nuevos = nuevos - 1
       pass
 
 
@@ -508,15 +551,16 @@ def GetData(url):
     fuente = pyfits.open(url)
     BloquePrincipal(url,suma,fuente)
   except:
-    milog.info('Error al abrir %s. Intentando reparar la cabecera...',url)
+    milog.info('Error al abrir ?. Intentando reparar la cabecera...',[url])
     try:
       fuente.verify('silentfix')
       fuente = pyfits.open(url)
       BloquePrincipal(url,suma,fuente)
       milog.info('Archivo reparado con éxito.')
     except:
-      milog.info('Error. No se pudo reparar la cabecera. El archivo %s no ha sido incluido en la base de datos.',url)
+      milog.info('Error. No se pudo reparar la cabecera. El archivo ? no ha sido incluido en la base de datos.',[url])
       print "---> Error al abrir " + url
+      nuevos = nuevos - 1
       pass
 
 # --------------------------------------------- CUERPO DEL PROGRAMA ---------------------------------------------
@@ -531,14 +575,15 @@ elif len(sys.argv) == 1:
   sys.exit()
 
 IniciarLogging()
-milog.info('Iniciando FitsDB...')
+milog.info('### ###   Iniciando FitsDB...')
 #IniciarDB()
 IniciarDB2() # Versión con soporte sqlite EN PRUEBAS
 
+global nuevos # El conteo de archivos nuevos no funciona cuando hay errores al leer cabeceras/ir a la DB
 rev = 0
 nuevos = 0
 
-milog.info('Iniciando barrido en busca de archivos zip.')
+milog.info('Iniciando barrido en busca de archivos Zip.')
 for (path, ficheros, archivos) in walk (directorio_imagenes):
   for archivo in archivos:
     if archivo.endswith(".zip"):
@@ -552,11 +597,11 @@ for (path, ficheros, archivos) in walk (directorio_imagenes):
         os.remove(ruta)
         milog.info('Zip descomprimido con éxito.')
       except:
-        milog.info('Error al descomprimir el archivo Zip %s.',ruta)
+        milog.info('Error al descomprimir el archivo Zip ?.',[ruta])
 milog.info('Finalizado el barrido en busca de archivos Zip.')
 
 
-milog.info('Iniciando barrido en busca de archivos fit/fits.')
+milog.info('Iniciando barrido en busca de archivos Fit/Fits.')
 for (path, ficheros, archivos) in walk (directorio_imagenes):
   for archivo in archivos:
     if archivo.endswith(".fits") or archivo.endswith(".fit") or archivo.endswith(".fts"):
@@ -571,8 +616,9 @@ for (path, ficheros, archivos) in walk (directorio_imagenes):
 
 
 msgfin = "Se han procesado " + str(rev) + " archivos.\nSe han incluido "+str(nuevos)+" archivos a la base de datos."
-milog.info('Se han procesado %s archivos. %s de ellos son nuevos.', str(rev), str(nuevos))
-milog.info('Fin del escaneo. Se cierra Fitsdb.\n\n')
+#milog.info('Se han procesado %s archivos. %s de ellos son nuevos.','eeeey', 'bueeno')
+milog.info('Se han procesado %s archivos. %s de ellos son nuevos.',str(rev), str(nuevos))
+milog.info('Fin del escaneo. Se cierra Fitsdb.')
 from termcolor import colored
 print "\n\nFin: " + str(datetime.utcnow())
 print colored (msgfin, "green")
