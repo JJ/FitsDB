@@ -7,7 +7,7 @@ from datetime import datetime
 
 
 
-def Error1():
+def Error1(): # REVISAR
   from termcolor import colored
   print colored ("¡ERROR!", "red")
   print "No se ha encontrado o no se ha podido acceder al archivo de configuración"
@@ -28,7 +28,7 @@ def Error1():
   print " "
 
 
-def ErrorNoArg():
+def ErrorNoArg(): # REVISAR
   from termcolor import colored
   milog.info('Faltan argumentos! No se ejecutó el escaneo.')
   print colored ("¡ERROR!", "red")
@@ -44,7 +44,7 @@ def ErrorNoArg():
   print " "
 
 
-def ErrorMuchosArg():
+def ErrorMuchosArg(): # REVISAR
   from termcolor import colored
   milog.info('Demasiados argumentos! No se ejecutó el escaneo.')
   print colored ("¡ERROR!", "red")
@@ -340,25 +340,28 @@ def BuscaFilter(cabecera,listaCampos):
 
 
 def CrearTablaObs():
-  try:
-    cur.execute("""CREATE TABLE IF NOT EXISTS tablaobs
-    (id BIGINT NOT NULL UNIQUE AUTO_INCREMENT,
-    moddate TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    md5sum CHAR(32),
-    imgtype VARCHAR(20),
-    object VARCHAR(30),
-    dateobs DATE,
-    timeobs TIME,
-    exptime INT,
-    observatory VARCHAR(80),
-    telescope VARCHAR(80),
-    instrument VARCHAR(80),
-    filter VARCHAR(50),
-    rute VARCHAR(200) NOT NULL)""")
-    cur.execute("SET NAMES 'utf8'")
-    cur.execute("SET CHARACTER SET utf8")
-  except:
-    milog.info('No se pudo crear la tabla \'tablaobs\' en la base de datos.')
+  if not cur.execute("SELECT count(*) FROM sqlite_master WHERE type='table' AND name='tablaobs").fetchall()[0][0]:
+    milog.info('No se ha encontrado \'tablaobs\' en la base de datos. Se procede a crearla.')
+    try:
+      cur.execute("""CREATE TABLE IF NOT EXISTS tablaobs
+      (id BIGINT NOT NULL UNIQUE AUTO_INCREMENT,
+      moddate TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      md5sum CHAR(32),
+      imgtype VARCHAR(20),
+      object VARCHAR(30),
+      dateobs DATE,
+      timeobs TIME,
+      exptime INT,
+      observatory VARCHAR(80),
+      telescope VARCHAR(80),
+      instrument VARCHAR(80),
+      filter VARCHAR(50),
+      rute VARCHAR(200) NOT NULL)""")
+      cur.execute("SET NAMES 'utf8'")  # Comprobar que estos comandos valen para sqlite
+      cur.execute("SET CHARACTER SET utf8")  # Comprobar que estos comandos valen para sqlite
+      milog.info('La tabla \'tablaobs\' se ha creado con éxito en la base de datos.')
+    except:
+      milog.info('No se pudo crear la tabla \'tablaobs\' en la base de datos.')
 
 
 def IniciarDB():
@@ -382,6 +385,49 @@ def IniciarDB():
         milog.info('Conexión a la base de datos realizada con éxito.')
       except:
         milog.info('Error al conectar con la base de datos.')
+
+
+def IniciarDB2():
+  if CheckConfFile(): # Estaría bien implementar que todos los campos que tienen que estar definidos lo están.
+    tipoDB = config.get('general', 'basededatos') # Pasar todo a minúsculas
+    if tipoDB == 'sqlite':
+      import sqlite3
+      print 'sqlite'
+      varDBName = config.get('sqlite','nombre')
+      if varDBName == '':
+        print Error1() # Revisar si este mensaje de error sigue valiendo para sqlite
+        milog.info('Error en el archivo de configuración. La base de datos sqlite tiene que tener un nombre.')
+        sys.exit()
+      else:
+        global db
+        global cur
+        db = sqlite3.connect(nombre+'.db')
+        cur = db.cursor()
+    elif tipoDB == 'mysql':
+      import MySQLdb
+      varUser = config.get('mysql', 'user')
+      varPass = config.get('mysql', 'pass')
+      varDBName = config.get('mysql', 'dbname')
+      varHost = config.get('mysql', 'hostname')
+      if (varUser == "") or (varPass == "") or (varDBName == "") or (varHost == ""):
+        print Error1()
+        milog.info('Faltan datos para conectar con la base de datos. Comprobar archivo de configuración.')
+        sys.exit()
+      else:
+        try:
+          global db
+          db = MySQLdb.connect(host=varHost,user=varUser,passwd=varPass,db=varDBName)
+          global cur
+          cur = db.cursor()
+          CrearTablaObs()
+          milog.info('Conexión a la base de datos realizada con éxito.')
+        except:
+          milog.info('Error al conectar con la base de datos.')
+    else:
+      milog.info('Error de configuración. Revise que la base seleccionada sea sqlite o mysql.')
+      sys.exit()
+      
+    
 
 
 def IniciarLogging():
@@ -486,7 +532,8 @@ elif len(sys.argv) == 1:
 
 IniciarLogging()
 milog.info('Iniciando FitsDB...')
-IniciarDB()
+#IniciarDB()
+IniciarDB2() # Versión con soporte sqlite EN PRUEBAS
 
 rev = 0
 nuevos = 0

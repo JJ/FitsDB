@@ -1,11 +1,29 @@
+[general]
+# Fitsdb soporta dos tipos de base de datos:
+# sqlite y mysql. Se utiliza sqlite por defecto.
+basededatos = sqlite
+
+# Habilitado por defecto. Esta opción busca la fecha de la observación
+# en la ruta del archivo. Con frecuencia se ponen las fechas como 
+# nombres de carpeta.
+fechaenruta = 1
+
+[sqlite]
+# Es imprescindible darle un nombre a la base de datos.
+nombre = fitsdb
+
+
 [mysql]
+# Estos datos solo son necesarios si se va a usar la base de
+# datos mysql. Para que Fitsdb funcione correctamente, 
+# debe configurar su servidor mysql previamente.
 user = 
 pass = 
 dbname = 
 hostname = 
 
-[general]
-fechaenruta = 0
 
-[logging]
-path = /var/local/fitsdb.d/
+[log]
+# Por defecto va vacío para que el archivo de configuración esté junto al ejecutable.
+# Probablemente vendría bien quitar la opción de mover el archivo de configuración.
+path = 
