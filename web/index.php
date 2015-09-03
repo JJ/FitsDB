@@ -30,7 +30,8 @@ $telescopio= strip_tags($_POST['telescopio']);
 $instrumento= strip_tags($_POST['instrumento']);
 $filtro= strip_tags($_POST['filtro']);
 
-
+// Iniciamos var para el tipo de base de datos. Toma valor en la función conectarDB().
+$tipoDB = '';
 ?>
 
 
@@ -55,7 +56,7 @@ function cambiar(){
 
 <H1 align=center>Interfaz web de FitsDB</H1>
 
-<form id="form1" name="form1" method="post" action="index2.php" align="right">
+<form id="form1" name="form1" method="post" action="index.php" align="right">
   <table width="900" border="0" align="center">
   <tr>
     <td>Nombre del objeto:</td>
@@ -211,6 +212,7 @@ function cambiar(){
     <td>
 <!-- 	<input type="text" name="observatorio" list="listaobservatorio" autocomplete/> -->
       	<?php
+      	echo "<p>holaaaaaaaa</p>";
 	if (strlen($observatorio)>0){
 	echo "<input type='text' name='observatorio' id='observatorio' list='listaobservatorio' value='".$observatorio."' autocomplete />";
 	}
@@ -220,13 +222,26 @@ function cambiar(){
 	?>
 	<datalist id="listaobservatorio">
 	<?php
+	
 	$conexion = conectarDB();
         $rsqlo = $conexion->query("SELECT observatory FROM tablaobs GROUP BY observatory");
-        $rsqlo -> data_seek(0);
-	while ($fila = $rsqlo->fetch_assoc()){
-          $filabuena = array_values($fila);
-          $num = count($filabuena);
-          echo "<option value='".$filabuena[0]."'>".$filabuena[0]."</option>";
+        
+        if ($tipoDB === 'sqlite'){
+        echo "<p>adios</p>";
+          while ($fila = $rsqlo->fetchArray()){
+          echo "<p>eeey</p>";
+            $filabuena = array_values($fila);
+            $num = count($filabuena);
+            echo "<option value='".$filabuena[0]."'>".$filabuena[0]."</option>";
+          }        
+        }
+        else if ($tipoDB === 'mysql'){
+          $rsqlo -> data_seek(0);
+          while ($fila = $rsqlo->fetch_assoc()){
+            $filabuena = array_values($fila);
+            $num = count($filabuena);
+            echo "<option value='".$filabuena[0]."'>".$filabuena[0]."</option>";
+          }
         }
 	//$arrayobservatorio = array('OSN','DSAZ','CGG','Teide','Atacama','IAC','la hita','lapalma');
 	//natsort($arrayobservatorio);
@@ -360,7 +375,7 @@ echo "Se muestran los resultados de su consulta.";
 // echo "<p>".$peticion."</p>";
   }
 else {
-  $peticion = "SELECT id, object, telescope, instrument, dateobs, timeobs, filter, imgtype, exptime, observatory, rute FROM tablaobs WHERE DATE_SUB(CURDATE(), INTERVAL 31 DAY) <= dateobs ORDER BY dateobs DESC";
+  $peticion = "SELECT id, object, telescope, instrument, dateobs, timeobs, filter, imgtype, exptime, observatory, rute FROM tablaobs WHERE DATE_SUB(CURDATE(), INTERVAL 31 DAY) <= dateobs ORDER BY dateobs DESC"; // Esta petición no vale para Sqlite
    echo "<p>Se muestran las observaciones realizadas en los últimos 31 días.</p>";
   }
 
@@ -371,8 +386,11 @@ else {
 
 $conexion = conectarDB();
 $resultado = $conexion->query($peticion);
-$resultado -> data_seek(0);
-$archivos = array();
+if ($tipoDB === 'mysql'){
+  $resultado -> data_seek(0);
+}
+// $resultado -> data_seek(0);
+$archivos = array(); // Iniciando variable
 
 
 ?>
@@ -429,6 +447,50 @@ $archivos = array();
   mkdir('sesion/',0777);
 }
 $salida = fopen('sesion/fitsdb_' . session_id(),'w')*/;
+// Inicia la representación
+if ($tipoDB === 'sqlite'){
+          while ($fila = $resultado->fetchArray()){ // Esta construcción del while no funciona. el () no da un true o false
+            $filabuena = array_values($fila);
+            echo "<tr>";
+            $n = count($filabuena);
+            for ($i=-1;$i<$n;$i++)
+            {
+                  if($i == -1){
+                          echo "<td align='center'>";
+                          printf("<input type='checkbox' class='A' name='selector[]' checked value='%s'>",$filabuena[$n-1]);
+                          echo "</td>";
+                  }
+                  else{
+                          echo "<td>";
+                          echo $filabuena[$i];
+                          echo "</td>";
+                  }
+            }
+            echo "</tr>";
+          }        
+        }
+        else if ($tipoDB === 'mysql'){
+          $rsqlo -> data_seek(0);
+          while ($fila = $resultado->fetch_assoc()){
+            $filabuena = array_values($fila);
+            echo "<tr>";
+            $n = count($filabuena);
+            for ($i=-1;$i<$n;$i++)
+            {
+                  if($i == -1){
+                          echo "<td align='center'>";
+                          printf("<input type='checkbox' class='A' name='selector[]' checked value='%s'>",$filabuena[$n-1]);
+                          echo "</td>";
+                  }
+                  else{
+                          echo "<td>";
+                          echo $filabuena[$i];
+                          echo "</td>";
+                  }
+            }
+            echo "</tr>";
+          }
+        }
 while ($fila = $resultado->fetch_assoc())
 {
   $filabuena = array_values($fila);
@@ -502,17 +564,27 @@ function limpieza($path)
     return false;
 }
 
-function conectarDB(){
-$config = parse_ini_file("/usr/local/etc/fitsdb.d/fitsdb.cfg",true);
-$mysql_user = $config['mysql']['user'];
-$mysql_pass = $config['mysql']['pass'];
-$mysql_dbname = $config['mysql']['dbname'];
-$mysql_hostname = $config['mysql']['hostname'];
+function conectarDB(){ # Aquí hay que introducir las modificaciones para añadir soporte a sqlite3
+  $config = parse_ini_file('config.cfg',true);
+  global $tipoDB;
+  $tipoDB = $config['general']['basededatos'];
+  if ($tipoDB === 'sqlite')
+  {
+    $nombreDB = $config['sqlite']['nombre'];
+    return new SQlite3($nombreDB.'.db');
+  }
+  else if ($tipoDB === 'mysql')
+  {
+    $mysql_user = $config['mysql']['user'];
+    $mysql_pass = $config['mysql']['pass'];
+    $mysql_dbname = $config['mysql']['dbname'];
+    $mysql_hostname = $config['mysql']['hostname'];
+    // global $conexion;
+    // $conexion = new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
+    return new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
+  }
 
 
-// global $conexion;
-// $conexion = new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
-return new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
 }
 
 function masnombres($nomobj)
@@ -572,15 +644,30 @@ function nombresadb($codigo,$numerico,$nombrestd)
 function tablanombres()
 {
 $conexion = conectarDB();
-  $rsql = $conexion->query("CREATE TABLE IF NOT EXISTS nombresobjetos (codigo varchar(15) UNIQUE NOT NULL, numerico varchar(15) UNIQUE, nombre varchar(50))");
+global $tipoDB;
+  if ($tipoDB === 'sqlite'){ // No puede escribir en la base de datos. Probablemente por un probelma de permisos
+    $rsql = $conexion->query("CREATE TABLE IF NOT EXISTS nombresobjetos (codigo TEXT UNIQUE, numerico TEXT UNIQUE, nombre TEXT)");
+  }
+  else if ($tipoDB === 'mysql'){
+    $rsql = $conexion->query("CREATE TABLE IF NOT EXISTS nombresobjetos (codigo varchar(15) UNIQUE NOT NULL, numerico varchar(15) UNIQUE, nombre varchar(50))");
+  }
+  
 }
 
 function consultanombreenbd($nombreconsulta)
 {
   $conexion = conectarDB();
-  $rsql = $conexion->query("SELECT * FROM nombresobjetos WHERE codigo like '%%".$nombreconsulta."%%' OR numerico like '%%".$nombreconsulta."%%' OR nombre like '%%".$nombreconsulta."%%'");
-  $rsql -> data_seek(0);
-  $fila = $rsql->fetch_assoc();
+  global $tipoDB;
+  $rsql = $conexion->query("SELECT * FROM nombresobjetos WHERE codigo like '%%".$nombreconsulta."%%' OR numerico like '%%".$nombreconsulta."%%' OR nombre like '%%".$nombreconsulta."%%'"); // No encuentra la tabla en la base de datos. Este error depende de los anteriores.
+          if ($tipoDB === 'sqlite'){
+            $fila = $rsql->fetchArray(); // Aquí da otro fallo que no sé por qué es.
+        }
+        else if ($tipoDB === 'mysql'){
+          $rsql -> data_seek(0);
+          $fila = $rsql->fetch_assoc();
+        }
+//   $rsql -> data_seek(0);
+//   $fila = $rsql->fetch_assoc();
   if (count($fila) >0){
     $filabuena = array_values($fila);
   }
