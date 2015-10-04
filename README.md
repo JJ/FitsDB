@@ -7,9 +7,9 @@ El catálogo generado es una base de datos MySQL de fácil consulta.
 
 ## Antes de usarlo
 
-- Instalar las librerías que utiliza: MySQL-python, astropy, configparser,
-mysql-connector-python, numpy, pyfits, termcolor
-que se pueden instalar fácilmente con la herramienta 'pip'.
+- Instalar las librerías que utiliza: 
+	pip install -r requirements.txt
+	
 - Tener en marcha MySQL en el ordenador que vayáis a usar, con un usuario
 para esto y una base de datos propia de ese usuario. Estos datos hay que
 introducirlos en el archivo 'fitsdb.cfg' que se puede crear a partir de

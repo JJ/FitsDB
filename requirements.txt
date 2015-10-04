@@ -1,0 +1,7 @@
+MySQL-python
+astropy
+configparser
+--allow-external mysql-connector-python
+numpy
+pyfits
+termcolor
