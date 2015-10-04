@@ -13,6 +13,7 @@ define('DEBUG', true);
 //error_reporting(E_ALL);
 //ini_set('display_errors', true);
 limpieza('descargas/');
+conectarDB();
 tablanombres();
 // limpieza('sesion/');
 
@@ -443,17 +444,14 @@ $archivos = array(); // Iniciando variable
   </thead>
 <?php
 $archivos = array();
-/*if (is_dir('sesion/') === false){
-  mkdir('sesion/',0777);
-}
-$salida = fopen('sesion/fitsdb_' . session_id(),'w')*/;
+
 // Inicia la representación
 if ($tipoDB === 'sqlite'){
           while ($fila = $resultado->fetchArray()){ // Esta construcción del while no funciona. el () no da un true o false
             $filabuena = array_values($fila);
             echo "<tr>";
             $n = count($filabuena);
-            for ($i=-1;$i<$n;$i++)
+            for ($i=-1;$i<$n;$i=$i+2)
             {
                   if($i == -1){
                           echo "<td align='center'>";
@@ -469,7 +467,7 @@ if ($tipoDB === 'sqlite'){
             echo "</tr>";
           }        
         }
-        else if ($tipoDB === 'mysql'){
+else if ($tipoDB === 'mysql'){
           $rsqlo -> data_seek(0);
           while ($fila = $resultado->fetch_assoc()){
             $filabuena = array_values($fila);
@@ -491,30 +489,32 @@ if ($tipoDB === 'sqlite'){
             echo "</tr>";
           }
         }
-while ($fila = $resultado->fetch_assoc())
-{
-  $filabuena = array_values($fila);
-  echo "<tr>";
-  $n = count($filabuena);
-  for ($i=-1;$i<$n;$i++)
-  {
-	if($i == -1){
-		echo "<td align='center'>";
-		printf("<input type='checkbox' class='A' name='selector[]' checked value='%s'>",$filabuena[$n-1]);
-		echo "</td>";
-	}
-	else{
-		echo "<td>";
-		echo $filabuena[$i];
-		echo "</td>";
-	}
-  }
-  echo "</tr>";
-//  $archivo = str_replace('/home/pablo/proyectoBD/FitsDB/','',$filabuena[$n-1]);
-//    $archivo = $filabuena[$n-1];
-//   fwrite($salida,$archivo.PHP_EOL);
-//   file_put_contents(,$archivo);
-}
+
+// ESTE BLOQUE PODRÍA SER PRESCINDIBLE
+// while ($fila = $resultado->fetch_assoc()) // Da error con sqlite. fetch_assoc() no está definido en sqlite
+// {
+//   $filabuena = array_values($fila);
+//   echo "<tr>";
+//   $n = count($filabuena);
+//   for ($i=-1;$i<$n;$i++)
+//   {
+// 	if($i == -1){
+// 		echo "<td align='center'>";
+// 		printf("<input type='checkbox' class='A' name='selector[]' checked value='%s'>",$filabuena[$n-1]);
+// 		echo "</td>";
+// 	}
+// 	else{
+// 		echo "<td>";
+// 		echo $filabuena[$i];
+// 		echo "</td>";
+// 	}
+//   }
+//   echo "</tr>";
+// //  $archivo = str_replace('/home/pablo/proyectoBD/FitsDB/','',$filabuena[$n-1]);
+// //    $archivo = $filabuena[$n-1];
+// //   fwrite($salida,$archivo.PHP_EOL);
+// //   file_put_contents(,$archivo);
+// }
 // fclose($salida);
 // foreach($archivos as $linea){
 // file_put_contents('sesion/fitsdb_' . session_id(),print_r($linea, TRUE));
@@ -532,19 +532,7 @@ while ($fila = $resultado->fetch_assoc())
 </div>
 <?php
 
-  
-// Function limpieza($direccion){
-// if (file_exists($direccion)){
-//   $path = $direccion;
-//     if ($handle = opendir($path)) {
-//       while (false !== ($file = readdir($handle))) {
-// 	  if ((time()-filectime($path.$file)) <= 86400) {
-// 	    unlink($path.$file);
-// 	  }
-//       }
-//     }
-//   }
-// }
+
 
 function limpieza($path)
 {
@@ -564,7 +552,11 @@ function limpieza($path)
     return false;
 }
 
-function conectarDB(){ # Aquí hay que introducir las modificaciones para añadir soporte a sqlite3
+function conectarDBnombres(){
+  return new SQLITE3('nombres_objetos.db');
+}
+
+function conectarDB(){ 
   $config = parse_ini_file('config.cfg',true);
   global $tipoDB;
   $tipoDB = $config['general']['basededatos'];
@@ -583,8 +575,6 @@ function conectarDB(){ # Aquí hay que introducir las modificaciones para añadi
     // $conexion = new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
     return new mysqli($mysql_hostname, $mysql_user, $mysql_pass, $mysql_dbname);
   }
-
-
 }
 
 function masnombres($nomobj)
@@ -633,22 +623,27 @@ return $array;
 
 function nombresadb($codigo,$numerico,$nombrestd)
 {
+global $tipoDB;
+  if ($tipoDB === 'sqlite'){
+    $conexion = conectarDBnombres();
+  }
+  else if ($tipoDB === 'mysql'){
     $conexion = conectarDB();
-    $peticion = "INSERT INTO nombresobjetos VALUES ('".$codigo."','".$numerico."','".$nombrestd."')";
-//     if (!mysql_query($conexion, $peticion)){
-    if (!$conexion ->query($peticion)){
-//     echo "<p> No envia a la DB. </p>";
-    }
+  }
+  $peticion = "INSERT INTO nombresobjetos VALUES ('".$codigo."','".$numerico."','".$nombrestd."')";
+  $conexion ->query($peticion);
 }
 
-function tablanombres()
+function tablanombres() 
 {
-$conexion = conectarDB();
+
 global $tipoDB;
-  if ($tipoDB === 'sqlite'){ // No puede escribir en la base de datos. Probablemente por un probelma de permisos
+  if ($tipoDB === 'sqlite'){
+  $conexion = conectarDBnombres();
     $rsql = $conexion->query("CREATE TABLE IF NOT EXISTS nombresobjetos (codigo TEXT UNIQUE, numerico TEXT UNIQUE, nombre TEXT)");
   }
   else if ($tipoDB === 'mysql'){
+    $conexion = conectarDB();
     $rsql = $conexion->query("CREATE TABLE IF NOT EXISTS nombresobjetos (codigo varchar(15) UNIQUE NOT NULL, numerico varchar(15) UNIQUE, nombre varchar(50))");
   }
   
@@ -656,11 +651,16 @@ global $tipoDB;
 
 function consultanombreenbd($nombreconsulta)
 {
-  $conexion = conectarDB();
   global $tipoDB;
-  $rsql = $conexion->query("SELECT * FROM nombresobjetos WHERE codigo like '%%".$nombreconsulta."%%' OR numerico like '%%".$nombreconsulta."%%' OR nombre like '%%".$nombreconsulta."%%'"); // No encuentra la tabla en la base de datos. Este error depende de los anteriores.
+  if ($tipoDB === 'sqlite'){
+    $conexion = conectarDBnombres();
+  }
+  else if ($tipoDB === 'mysql'){
+    $conexion = conectarDB();
+  }
+  $rsql = $conexion->query("SELECT * FROM nombresobjetos WHERE codigo like '%%".$nombreconsulta."%%' OR numerico like '%%".$nombreconsulta."%%' OR nombre like '%%".$nombreconsulta."%%'"); 
           if ($tipoDB === 'sqlite'){
-            $fila = $rsql->fetchArray(); // Aquí da otro fallo que no sé por qué es.
+            $fila = $rsql->fetchArray();
         }
         else if ($tipoDB === 'mysql'){
           $rsql -> data_seek(0);
@@ -676,6 +676,12 @@ function consultanombreenbd($nombreconsulta)
   }
   return $filabuena;
 }
+
+// function consultanombreenbd($nombre) // Función hueca para salir del paso. La original no funciona con sqlite
+// {
+//   $filabuena=array('','','');
+//   return $filebuena;
+// }
 
 
 ?>

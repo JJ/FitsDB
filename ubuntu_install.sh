@@ -19,7 +19,7 @@ auth.require = ( \"/fitsdb/\" =>\n
 )
 """
 
-echo """
+echo -e """
 ########################### FitsDB ###########################
 
 Iniciando asistente de instalación de FitsDB para Ubuntu. 
@@ -60,7 +60,7 @@ done
 
 dialog --msgbox "Iniciando la configuración de FitsDB... \n \n A continuación se va a mostrar el asistente de configuración de FitsDB. Recuerde que siempre puede cambiar la configuración editando el archivo config.cfg que se encuentra en $home_path. Hágalo bajo su propia responsabilidad." 0 0
 
-type_db=$(dialog --stdout --radiolist 'Seleccione el tipo de base de datos que desee usar:' 0 0 0 sqlite "Recomendada para la mayoría de las instalaciones. Seleccionada por defecto." "" mysql "Recomendada para instalaciones con gran afluencia. Si elige esta opción tendrá que configurar su servidor MySQL de forma manual." "")
+type_db=$(dialog --stdout --radiolist 'Seleccione el tipo de base de datos que desee usar:' 0 0 0 sqlite "Recomendada para la mayoría de las instalaciones. Seleccionada por defecto." "on" mysql "Recomendada para instalaciones con gran afluencia. Si elige esta opción tendrá que configurar su servidor MySQL de forma manual." "")
 
 case $type_db in
         sqlite)
@@ -68,6 +68,7 @@ case $type_db in
           nombre=$(dialog --stdout --inputbox "Escriba el nombre de la base de datos SQLite:" 0 0 fitsdb)
           sed -e "s/nombre =/nombre = $nombre/" $home_path"/config.cfg" > $home_path"/config.cfg"
           sudo apt-get install sqlite3
+          ln -s $home_path"/"$nombre $web_path_full"/"$nombre
           ;;
         mysql)
           sed -e "s/basededatos =/basededatos = mysql/" $home_path"/config.cfg.new" > $home_path"/config.cfg"
@@ -105,7 +106,7 @@ sudo lighty-enable-mod fastcgi
 sudo lighty-enable-mod fastcgi-php
 
 
-web_pass=$(dialog --stdout --radiolist "¿Desea proteger la interfaz web mediante usuario y contraseña? \n Las credenciales se guardarán en el archivo /lighttpd_password situado en $home_path." 0 0 0 "1" "Sí" "" "2" "No (por defecto)" "" )
+web_pass=$(dialog --stdout --radiolist "¿Desea proteger la interfaz web mediante usuario y contraseña? \n Las credenciales se guardarán en el archivo /lighttpd_password situado en $home_path." 0 0 0 "1" "Sí" "" "2" "No (por defecto)" "on" )
 mkdir $temp_path
 cp /etc/lighttpd/lighttpd.conf $temp_path"/lighttpd.conf"
 
@@ -138,7 +139,19 @@ case $web_pass in
 esac
 
 sudo cp $temp_path"/lighttpd.conf" /etc/lighttpd/lighttpd.conf
-
-
 sudo /etc/init.d/lighttpd force-reload
-# Falta configurar el cron con escaneos periódicos
+
+dialog --stdout --yesno "Para el correcto funcionamiento de FitsDB se recomienda programar mediante CRON un escaneo periódico de la base de datos. ¿Desea programar un escaneo semanal ahora? " 0 0
+if [ $? -eq 0 ]; then
+  carpeta=$(dialog --stdout --title "Directorio a escanear" --dselect $PWD 0 0)
+  dia=$(dialog --stdout --radiolist "Día de la semana" 0 0 0 "1" "lunes" "on" "2" "martes" "" "3" "miércoles" "" "4" "jueves" "" "5" "viernes" "" "6" "sábado" "" "7" "domingo" "")
+  hora=$(dialog --stdout --timebox "Seleccione la hora" 0 0 0 0)
+  hora1=$(echo $hora| tr ":" " "|awk '{print $1}')
+  hora2=$(echo $hora| tr ":" " "|awk '{print $2}')
+  linea="$hora2 $hora1 "*" "*" $dia $home_path"/fitsdb.py" $carpeta"
+  crontab -l > $temp_path"/cron_tmp"
+  echo "$linea" >> $temp_path"/cron_tmp"
+  crontab $temp_path"/cron_tmp"
+fi
+
+dialog --msgbox "Asistente de instalación finalizado." 0 0
