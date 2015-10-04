@@ -35,6 +35,8 @@ distro=$(cat /etc/*-release* | grep -e "ID=ubuntu")
 if [ ! $distro ]; then
   exit
 fi
+# Creamos el directorio de instalación
+mkdir $home_path
 
 # Instalamos requisitos desde el gestor de paqutes
 sudo apt install python-{setuptools,mysql.connector,numpy} lighttpd dialog php5-cgi
@@ -43,17 +45,16 @@ sudo apt install python-{setuptools,mysql.connector,numpy} lighttpd dialog php5-
 sudo easy_install pip virtualenv
 
 # Preparamos el entorno privado virtual
-virtualenv -p $py_path venv
+virtualenv -p $py_path $home_path"/venv"
 
 # Entramos en venv
-source venv/bin/activate
+source $home_path/venv/bin/activate
 
 # Instalamos requisitos en venv
 pip install --upgrade setuptools
 pip install -r requirements.txt
 
 # Configuramos el directorio principal de FitsDB
-mkdir $home_path
 for f in $root_path""/{fitsdb.py,config.cfg.new,License,README.md}""; do
   cp $f $home_path"/."
 done
