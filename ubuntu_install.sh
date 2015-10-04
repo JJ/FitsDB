@@ -57,6 +57,7 @@ mkdir $home_path
 for f in $root_path""/{fitsdb.py,config.cfg.new,License,README.md}""; do
   cp $f $home_path"/."
 done
+cp $home_path"/config.cfg.new" $home_path"/config.cfg"
 
 dialog --msgbox "Iniciando la configuración de FitsDB... \n \n A continuación se va a mostrar el asistente de configuración de FitsDB. Recuerde que siempre puede cambiar la configuración editando el archivo config.cfg que se encuentra en $home_path. Hágalo bajo su propia responsabilidad." 0 0
 
@@ -64,28 +65,28 @@ type_db=$(dialog --stdout --radiolist 'Seleccione el tipo de base de datos que d
 
 case $type_db in
         sqlite)
-          sed -e "s/basededatos =/basededatos = sqlite/" $home_path"/config.cfg.new" > $home_path"/config.cfg"
+          sed -i "s/basededatos =/basededatos = sqlite/" $home_path"/config.cfg"
           nombre=$(dialog --stdout --inputbox "Escriba el nombre de la base de datos SQLite:" 0 0 fitsdb)
-          sed -e "s/nombre =/nombre = $nombre/" $home_path"/config.cfg" > $home_path"/config.cfg"
+          sed -i "s/nombre =/nombre = $nombre/" $home_path"/config.cfg" > $home_path"/config.cfg"
           sudo apt-get install sqlite3
           ln -s $home_path"/"$nombre $web_path_full"/"$nombre
           ;;
         mysql)
-          sed -e "s/basededatos =/basededatos = mysql/" $home_path"/config.cfg.new" > $home_path"/config.cfg"
+          sed -i "s/basededatos =/basededatos = mysql/" $home_path"/config.cfg"
           mysql_user=$(dialog --stdout --inputbox "Escriba el nombre de usuario de MySQL:" 0 0)
           mysql_pass=$(dialog --stdout --inputbox "¡Atención, esta contraseña se guardará en texto plano!\nEscriba la contraseña del usuario $mysql_user:" 0 0)
           mysql_dbname=$(dialog --stdout --inputbox "Escriba el nombre de la base de datos a utilizar:" 0 0)
           mysql_hostname=$(dialog --stdout --inputbox "Escriba la dirección del servidor MySQL:" 0 0 localhost)
-          sed -e "s/user =/user = $mysql_user/" $home_path"/config.cfg" > $home_path"/config.cfg"
-          sed -e "s/pass =/pass = $mysql_pass/" $home_path"/config.cfg" > $home_path"/config.cfg"
-          sed -e "s/dbname =/dbname = $mysql_dbname/" $home_path"/config.cfg" > $home_path"/config.cfg"
-          sed -e "s/hostname =/hostname = $mysql_hostname/" $home_path"/config.cfg" > $home_path"/config.cfg"
+          sed -i "s/user =/user = $mysql_user/" $home_path"/config.cfg"
+          sed -i "s/pass =/pass = $mysql_pass/" $home_path"/config.cfg"
+          sed -i "s/dbname =/dbname = $mysql_dbname/" $home_path"/config.cfg"
+          sed -i "s/hostname =/hostname = $mysql_hostname/" $home_path"/config.cfg"
           sudo apt-get install mysql-server
           ;;
         *)
-          sed -e "s/basededatos =/basededatos = sqlite/" $home_path"/config.cfg.new" > $home_path"/config.cfg"
+          sed -i "s/basededatos =/basededatos = sqlite/" $home_path"/config.cfg"
           nombre=$(dialog --stdout --inputbox "Escriba el nombre de la base de datos SQLite:" 0 0 fitsdb)
-          sed -e "s/nombre =/nombre = $nombre/" $home_path"/config.cfg" > $home_path"/config.cfg"
+          sed -i "s/nombre =/nombre = $nombre/" $home_path"/config.cfg"
           ;;
 esac
 
